@@ -1,0 +1,414 @@
+<title>Омут — визуальный концепт</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ruslan+Display&family=Alegreya:ital,wght@0,500;0,700;0,800;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<style>
+/* Раскладка: стол сверху вниз — поле соперника, полоса Омута, твоё поле, рука; справа (или ниже на телефоне) — разбор карты. Одна тёмная тема по замыслу: торфяная вода. */
+:root{
+  color-scheme: dark;
+  --bg:#141815; --table:#1b201c; --panel:#222823; --line:#343d36;
+  --ink:#ebe4d0; --muted:#a19e8b; --brass:#cfa64c; --blood:#b3392f; --ok:#7fae6a;
+  --r-common:#8d8c82; --r-rare:#4a8bb5; --r-epic:#a33a4a; --r-legend:#d4ac4f;
+  --f-display:"Ruslan Display", "Alegreya", Georgia, serif;
+  --f-card:"Alegreya", Georgia, "Times New Roman", serif;
+  --f-ui:"Alegreya Sans", "Segoe UI", Roboto, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:auto}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.45;padding:0 16px;}
+.wrap{max-width:1360px;margin:0 auto;padding-block:20px 48px;display:grid;gap:28px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(34px,5vw,56px);line-height:1;margin:0;letter-spacing:.02em}
+h1 small{display:block;font-family:var(--f-card);font-style:italic;font-size:17px;color:var(--muted);letter-spacing:0;margin-top:8px}
+h2{font-family:var(--f-card);font-weight:800;font-size:24px;margin:0 0 12px;text-wrap:balance}
+h3{font-family:var(--f-card);font-weight:700;font-size:18px;margin:0 0 6px}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.btn{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 14px;font-weight:500}
+.btn:hover{border-color:var(--brass)}
+
+/* ---------- стол ---------- */
+.game{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+@media (max-width:1100px){.game{grid-template-columns:minmax(0,1fr)}}
+.table{background:var(--table);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px;min-width:0}
+.scroller{overflow-x:auto;padding-bottom:4px}
+.row{display:grid;grid-template-columns:repeat(5,minmax(176px,1fr));gap:10px;min-width:920px}
+.player{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.who{font-family:var(--f-card);font-weight:700;font-size:17px}
+.stats{display:flex;gap:16px;font-variant-numeric:tabular-nums}
+.stat{display:flex;align-items:center;gap:6px;font-weight:700;font-size:16px}
+.stat svg{width:18px;height:18px}
+.hp{color:#e0796f}.coin{color:var(--brass)}
+
+/* мир-поле: квадрат с двумя слотами */
+.world{aspect-ratio:1/1;max-width:100%;border-radius:8px;position:relative;overflow:hidden;display:grid;grid-template-rows:auto 1fr;border:1px solid color-mix(in srgb,var(--w) 45%,transparent);background:var(--wbg)}
+.world .scene{position:absolute;inset:0;opacity:.55;pointer-events:none}
+.world .scene svg{width:100%;height:100%;display:block}
+.whead{position:relative;display:flex;align-items:center;gap:6px;padding:6px 8px;background:color-mix(in srgb,var(--wbg) 70%,#000);font-family:var(--f-card);font-weight:700;font-size:14px}
+.whead .ico{width:20px;height:20px;color:var(--w);flex:none}
+.whead .cls{margin-left:auto;font-family:var(--f-ui);font-weight:500;font-size:12px;color:var(--muted)}
+.slots{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px;align-items:center}
+.slot{aspect-ratio:5/7;max-width:100%;border:1px dashed color-mix(in srgb,var(--w) 50%,transparent);border-radius:6px;display:grid;place-items:center;background:rgba(0,0,0,.22);color:var(--muted);font-size:12px;text-align:center;padding:4px}
+.slot.can{border-style:solid;border-color:var(--ok);background:rgba(127,174,106,.12);color:var(--ok);cursor:pointer}
+.slot.cannot{border-color:var(--blood);opacity:.55}
+
+/* полоса Омута */
+.midline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 12px;border-block:1px solid var(--line)}
+.pile{display:flex;align-items:center;gap:10px}
+.deck{width:44px;height:62px;border-radius:5px;background:#0e1314;border:1px solid #2f4446;display:grid;place-items:center;color:#6fa7a6}
+.deck svg{width:26px;height:26px}
+.pile b{display:block;font-family:var(--f-card);font-size:15px}
+.pile span{font-size:13px;color:var(--muted)}
+.msg{flex:1 1 280px;min-width:0;font-size:14px;color:var(--muted);text-align:center}
+.msg.bad{color:#e0796f}.msg.good{color:var(--ok)}
+
+/* ---------- карта ---------- */
+.card{--rar:var(--r-common);position:relative;width:100%;aspect-ratio:5/7;border-radius:6px;border:2px solid var(--rar);background:#0d0f0e;overflow:hidden;display:grid;grid-template-rows:auto 1fr auto;font-family:var(--f-card);text-align:left;padding:0;box-shadow:0 2px 0 rgba(0,0,0,.5)}
+.card[data-r="rare"]{--rar:var(--r-rare)}.card[data-r="epic"]{--rar:var(--r-epic)}.card[data-r="legend"]{--rar:var(--r-legend)}
+.card .art{position:absolute;inset:0}
+.card .art svg{width:100%;height:100%;display:block}
+.card .ctop{position:relative;display:flex;align-items:flex-start;justify-content:space-between;padding:3px}
+.cost{width:22px;height:22px;border-radius:50%;background:var(--brass);color:#2a1e08;font-weight:800;font-size:13px;display:grid;place-items:center;font-family:var(--f-ui);flex:none}
+.cico{width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.55);display:grid;place-items:center;color:var(--w)}
+.cico svg{width:14px;height:14px}
+.card .cname{position:relative;align-self:end;padding:2px 4px;background:rgba(10,10,10,.72);font-weight:700;font-size:11px;line-height:1.15;color:var(--ink)}
+.card .cfoot{position:relative;display:flex;justify-content:space-between;align-items:center;padding:3px;background:rgba(10,10,10,.82);font-family:var(--f-ui);font-weight:700;font-size:12px;font-variant-numeric:tabular-nums}
+.atk{color:#f0c07a}.hpv{color:#e88a80}
+.card .tag{position:absolute;right:3px;top:28px;font-family:var(--f-ui);font-size:9px;font-weight:700;background:var(--ink);color:#1a1a1a;border-radius:3px;padding:1px 4px}
+.card.enemy{cursor:pointer}
+.card.sel{outline:2px solid var(--brass);outline-offset:2px}
+
+/* рука */
+.hand{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 6px}
+.hand .card{width:112px;flex:none;cursor:pointer;transition:transform .15s}
+.hand .card:hover{transform:translateY(-4px)}
+.hand .card .cname{font-size:13px}
+@media (prefers-reduced-motion:reduce){.hand .card{transition:none}.hand .card:hover{transform:none}}
+
+/* ---------- разбор карты ---------- */
+.inspect{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:14px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+@media (max-width:1100px){.inspect{position:static}}
+.big{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;align-items:start}
+.big .card{width:150px}
+.big .card .cname{font-size:15px}
+.big .card .cfoot{font-size:15px}
+.meta{display:grid;gap:4px;font-size:14px;min-width:0}
+.meta .k{color:var(--muted)}
+.ability{font-family:var(--f-card);font-size:16px;line-height:1.45;border-top:1px solid var(--line);padding-top:12px}
+.ability b{color:var(--brass)}
+.reward{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.reward strong{color:var(--brass);font-size:18px}
+
+/* ---------- миры и правила ---------- */
+.worlds{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.wcard{border-radius:8px;overflow:hidden;border:1px solid color-mix(in srgb,var(--w) 40%,transparent);background:var(--wbg);display:grid;grid-template-rows:110px auto}
+.wcard .scene{position:relative}
+.wcard .scene svg{width:100%;height:100%;display:block}
+.wcard .wb{padding:10px 12px 12px;background:color-mix(in srgb,var(--wbg) 60%,#000);display:grid;gap:4px}
+.wcard .wb h3{display:flex;align-items:center;gap:8px;margin:0}
+.wcard .wb h3 svg{width:22px;height:22px;color:var(--w)}
+.wcard .wb .c{font-size:13px;color:var(--w);font-weight:700}
+.wcard .wb p{font-size:14px;color:var(--muted)}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.rule{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:10px;align-content:start}
+.rule p{font-size:15px;max-width:62ch}
+.ex{display:grid;gap:6px;font-size:14px}
+.ex div{display:flex;gap:8px;align-items:center}
+.ex .y{color:var(--ok);font-weight:700;width:18px}.ex .n{color:#e0796f;font-weight:700;width:18px}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.gallery .card{cursor:pointer}
+.gallery .card .cname{font-size:14px}
+.gallery .card .cfoot{font-size:14px}
+.note{font-size:14px;color:var(--muted);max-width:70ch}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Омут<small>В чёрном омуте черти водятся</small></h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" id="shuffle">Перемешать миры</button>
+      <button class="btn" id="reset">Начать заново</button>
+    </div>
+  </header>
+
+  <section class="game" aria-label="Игровой стол">
+    <div class="table">
+      <div class="player">
+        <span class="who">Соперник — Бот</span>
+        <span class="stats"><span class="stat hp" id="eHp"></span><span class="stat coin" id="eCoin"></span></span>
+      </div>
+      <div class="scroller"><div class="row" id="enemyRow"></div></div>
+
+      <div class="midline">
+        <div class="pile"><div class="deck" id="deckIco"></div><div><b>Омут</b><span id="deckN">41 карта</span></div></div>
+        <p class="msg" id="msg">Выбери карту в руке, затем свободный слот. Зелёным подсвечены слоты, куда её можно поставить.</p>
+        <div class="pile"><div><b style="text-align:right">Дно</b><span>сброс: 0</span></div><div class="deck" style="color:var(--muted);border-color:var(--line)">0</div></div>
+      </div>
+
+      <div class="scroller"><div class="row" id="myRow"></div></div>
+      <div class="player">
+        <span class="who">Ты</span>
+        <span class="stats"><span class="stat hp" id="mHp"></span><span class="stat coin" id="mCoin"></span></span>
+      </div>
+      <div class="hand" id="hand" aria-label="Рука"></div>
+    </div>
+
+    <aside class="inspect" id="inspect" aria-live="polite"></aside>
+  </section>
+
+  <section>
+    <h2>Шесть миров</h2>
+    <p class="note" style="margin-bottom:14px">На столе всегда 5 миров напротив 5 миров. Миров в игре шесть: каждую партию они перемешиваются, и один остаётся в стороне. У каждого мира свой значок и свой «родной» класс существ.</p>
+    <div class="worlds" id="worlds"></div>
+  </section>
+
+  <section>
+    <h2>Правила стола</h2>
+    <div class="rules">
+      <div class="rule">
+        <h3>Кто может встать в мир</h3>
+        <p>В каждом мире 2 места. Хотя бы одно существо в мире должно быть родного класса, то есть совпадать со значком мира. Второе может быть любым.</p>
+        <div class="ex">
+          <div><span class="y">✓</span>Явь: Люди + Люди</div>
+          <div><span class="y">✓</span>Явь: Люди + Нечисть</div>
+          <div><span class="n">✕</span>Явь: Нечисть + Чудища — ни одного человека</div>
+          <div><span class="n">✕</span>Явь: Нечисть в пустой мир — сначала нужен человек</div>
+        </div>
+        <p class="note">Исключение — Омут: туда можно ставить кого угодно.</p>
+      </div>
+      <div class="rule">
+        <h3>Как идёт атака</h3>
+        <p>Мир бьёт мир напротив. Твоё существо атакует любую из двух карт в мире напротив. Если там пусто, удар идёт прямо в жизни соперника (их 25), пока он не закроет этот мир картой.</p>
+      </div>
+      <div class="rule">
+        <h3>Приоритет</h3>
+        <p>Если в мире стоит карта с <b>Приоритетом</b>, враг бьёт только её. Соседа нельзя тронуть, пока защитник жив. Приоритет есть у стражей и танков, его можно выдать чарами «Знамя».</p>
+      </div>
+      <div class="rule">
+        <h3>Соседи</h3>
+        <p>Две карты в одном мире — соседи. На этом держатся поддержки: Кот лечит соседа, Знаменосец усиливает его удар.</p>
+      </div>
+      <div class="rule">
+        <h3>Монеты</h3>
+        <p>За каждую убитую карту дают от 0 до 5 монет. Сумма написана на самой карте и зависит от её силы, а не от редкости. Мелкие защитники стоят 0: ими закрывают удар.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Карты концепта</h2>
+    <p class="note" style="margin-bottom:14px">Нажми на карту, чтобы прочитать описание. Рисунки здесь — силуэты-заглушки: фон карты всегда показывает её родной мир, рамка — редкость (серая, синяя, багровая, золотая).</p>
+    <div class="gallery" id="gallery"></div>
+  </section>
+</div>
+
+<script>
+(function(){
+const ICONS={
+ sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>',
+ skull:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5c-4.7 0-8 3.3-8 7.6 0 2.5 1.2 4.4 3 5.5V19c0 .8.6 1.5 1.4 1.5H9v-2h1.6v2h2.8v-2H15v2h.6c.8 0 1.4-.7 1.4-1.5v-3.4c1.8-1.1 3-3 3-5.5 0-4.3-3.3-7.6-8-7.6Zm-3.2 10.8a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm6.4 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/></svg>',
+ eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12c3-5.5 6.5-7.5 10-7.5S19 6.5 22 12c-3 5.5-6.5 7.5-10 7.5S5 17.5 2 12Z"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg>',
+ tent:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 21c0-6 4-7 4-11a3 3 0 0 1 6 0"/><path d="M15 10c0 2.5-2 3-2 5 0 1.5 1.3 2.5 2.6 2.5S18 16.2 18 15"/><circle cx="15.5" cy="15" r=".6" fill="currentColor"/></svg>',
+ flame:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2s5.5 5 5.5 10.5A5.5 5.5 0 0 1 12 18a5.5 5.5 0 0 1-5.5-5.5c0-2.4 1.3-4 2.3-5 .2 1.8 1 3 2.2 3.3C11 7.6 12 2 12 2Zm0 11.5c-1.2 1.2-1.8 2.3-1.8 3.2A1.8 1.8 0 0 0 12 22a1.8 1.8 0 0 0 1.8-1.8c0-.9-.6-2-1.8-3.2Z"/></svg>',
+ swirl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 12a1.6 1.6 0 1 1 1.6 1.6A3.2 3.2 0 1 1 16.8 10.4 4.8 4.8 0 1 1 12 5.6a6.4 6.4 0 1 1-6.4 6.4"/></svg>',
+ heart:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11Z"/></svg>',
+ coin:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="currentColor"/><circle cx="12" cy="12" r="5.5" fill="none" stroke="#2a1e08" stroke-width="1.6"/></svg>'
+};
+// миры: класс = родной класс существ; null — принимает всех
+const WORLDS={
+ yav:{name:'Явь',cls:'Люди',ico:'sun',w:'#d6ad52',wbg:'#2e2a1b',text:'Мир людей: поля, заставы, деревянные остроги. Сюда ставят ратников, стрелков и знахарей.'},
+ nav:{name:'Навь',cls:'Нежить',ico:'skull',w:'#9fb3a6',wbg:'#1c2321',text:'Царство мёртвых под землёй: курганы, кости, вечный туман. Дом упырей и скелетов.'},
+ chasha:{name:'Чаща',cls:'Нечисть',ico:'eye',w:'#86b066',wbg:'#16220f',text:'Тёмный лес, где тропы путаются сами. Тут живут кикиморы, лешие, коты-баюны.'},
+ puchina:{name:'Пучина',cls:'Чудища',ico:'tent',w:'#5aa0cf',wbg:'#0c1c28',text:'Морская глубина без дна. Кракены, змеи и жабы-великаны.'},
+ peklo:{name:'Пекло',cls:'Бесы',ico:'flame',w:'#e07440',wbg:'#2a110a',text:'Огненный низ мира. Бесы, огненные змеи и всё, что горит.'},
+ omut:{name:'Омут',cls:null,ico:'swirl',w:'#8fc1bb',wbg:'#111b1c',text:'Воронка между мирами. Сюда можно ставить любых существ: правило класса не действует.'}
+};
+const ORDER=['yav','nav','chasha','puchina','peklo','omut'];
+
+function scene(k,seed){
+ seed=seed||0;
+ const s={
+ yav:`<rect width="200" height="140" fill="#3a331f"/><circle cx="150" cy="38" r="20" fill="#d6ad52" opacity=".55"/><path d="M0 95 Q50 70 100 92 T200 85 V140 H0Z" fill="#4c4426"/><path d="M0 112 Q60 92 120 110 T200 104 V140 H0Z" fill="#5c5230"/><g fill="#2a2416"><rect x="20" y="78" width="4" height="22"/><rect x="28" y="74" width="4" height="26"/><rect x="36" y="78" width="4" height="22"/><path d="M18 78 l4 -6 4 6 M26 74 l4 -6 4 6 M34 78 l4 -6 4 6"/></g>`,
+ nav:`<rect width="200" height="140" fill="#1e2624"/><ellipse cx="100" cy="130" rx="140" ry="30" fill="#29332f"/><g fill="#141a18"><path d="M30 120 v-26 h-8 v-6 h8 v-8 h6 v8 h8 v6 h-8 v26z"/><path d="M150 124 v-20 h-6 v-5 h6 v-6 h5 v6 h6 v5 h-6 v20z"/><path d="M80 126 q20 -40 40 0z"/></g><g fill="#9fb3a6" opacity=".12"><rect y="70" width="200" height="6"/><rect y="86" width="200" height="4"/></g>`,
+ chasha:`<rect width="200" height="140" fill="#17230f"/><g fill="#0e170a">${[0,28,56,84,112,140,168].map((x,i)=>`<path d="M${x+14} ${30+(i%3)*8} l16 34 h-8 l12 26 h-10 l12 30 h-44 l12 -30 h-10 l12 -26 h-8z"/>`).join('')}</g><g fill="#c7e07a"><circle cx="62" cy="88" r="2"/><circle cx="70" cy="88" r="2"/><circle cx="142" cy="70" r="1.6"/><circle cx="149" cy="70" r="1.6"/></g>`,
+ puchina:`<rect width="200" height="140" fill="#0c1d2a"/><g fill="none" stroke="#5aa0cf" stroke-width="2" opacity=".35"><path d="M0 30 q25 -10 50 0 t50 0 t50 0 t50 0"/><path d="M0 46 q25 -10 50 0 t50 0 t50 0 t50 0" opacity=".6"/></g><g fill="#071118"><path d="M20 140 q10 -60 30 -70 q-14 30 6 70z"/><path d="M150 140 q-6 -50 22 -66 q-8 30 4 66z"/><path d="M90 140 q4 -30 16 -40 q-4 20 6 40z"/></g><g fill="#5aa0cf" opacity=".4"><circle cx="70" cy="80" r="3"/><circle cx="76" cy="66" r="2"/><circle cx="128" cy="96" r="2.4"/></g>`,
+ peklo:`<rect width="200" height="140" fill="#2a110a"/><g fill="#5a1d0e">${[0,40,80,120,160].map(x=>`<path d="M${x} 140 q10 -50 20 -70 q2 30 14 36 q4 -20 6 -30 q14 30 0 64z"/>`).join('')}</g><g fill="#e07440" opacity=".5">${[10,50,90,130,170].map((x,i)=>`<path d="M${x} 140 q6 -30 12 -${36+(i%2)*14} q8 24 6 ${36+(i%2)*14}z"/>`).join('')}</g><circle cx="40" cy="30" r="1.5" fill="#f3a46b"/><circle cx="120" cy="20" r="1.2" fill="#f3a46b"/><circle cx="170" cy="46" r="1.4" fill="#f3a46b"/>`,
+ omut:`<rect width="200" height="140" fill="#101a1b"/><g fill="none" stroke="#8fc1bb">${[60,46,33,21,11].map((r,i)=>`<ellipse cx="100" cy="74" rx="${r*1.6}" ry="${r*.7}" opacity="${.12+i*.08}" stroke-width="2"/>`).join('')}</g><circle cx="100" cy="74" r="4" fill="#050a0a"/>`
+ }[k];
+ return `<svg viewBox="0 0 200 140" preserveAspectRatio="xMidYMid slice">${s}</svg>`;
+}
+// силуэты персонажей (заглушки)
+const SIL={
+ human:'<path d="M100 40a12 12 0 1 1 0 24a12 12 0 0 1 0-24Zm-22 34h44l8 48h-12l-4 40h-28l-4-40h-12z"/>',
+ archer:'<path d="M96 40a11 11 0 1 1 0 22a11 11 0 0 1 0-22Zm-18 30h36l6 46h-10l-4 44h-24l-4-44h-8z"/><path d="M132 40 q24 46 0 92" fill="none" stroke="currentColor" stroke-width="3"/><path d="M132 40 v92" stroke="currentColor" stroke-width="1"/>',
+ knight:'<path d="M100 34a14 14 0 0 1 14 14v8h-28v-8a14 14 0 0 1 14-14Zm-26 30h52l8 50h-14l-4 46h-32l-4-46h-14z"/><path d="M60 72h26v40q-13 10-26 0z"/>',
+ skull:'<path d="M100 38c-16 0-26 11-26 25 0 8 4 14 9 17v10h34v-10c5-3 9-9 9-17 0-14-10-25-26-25Zm-10 34a6 6 0 1 1 0-12a6 6 0 0 1 0 12Zm20 0a6 6 0 1 1 0-12a6 6 0 0 1 0 12Z"/><path d="M84 96h32l4 64h-40z" opacity=".7"/>',
+ ghoul:'<path d="M100 40c-12 0-20 9-20 20 0 6 2 10 5 13l-15 20 10 6-6 60h52l-6-60 10-6-15-20c3-3 5-7 5-13 0-11-8-20-20-20Z"/><path d="M92 60l-4 6h8zM108 60l-4 6h8z" fill="#c33"/>',
+ cat:'<path d="M70 100 l6 -30 14 16 h20 l14 -16 6 30 c6 10 6 22 0 30 c10 6 22 2 24 -8 c4 14 -8 30 -30 28 h-50 c-16 0 -24 -14 -18 -30 c-4 -6 -4 -14 4 -20z"/><circle cx="90" cy="102" r="3" fill="#c7e07a"/><circle cx="110" cy="102" r="3" fill="#c7e07a"/>',
+ hag:'<path d="M100 30 l22 40 h-44z"/><path d="M84 70h32l10 90h-52z"/><path d="M130 60 v100" stroke="currentColor" stroke-width="4"/>',
+ kraken:'<path d="M100 36c-20 0-32 16-32 34 0 10 4 18 10 22-10 14-22 20-34 22 14 6 30 2 40-10-2 16-12 30-22 38 16 0 28-12 32-30 2 18 10 30 22 34-6-10-8-24-6-38 10 12 24 16 38 10-12-2-24-8-34-22 6-4 10-12 10-22 0-18-12-34-34-34Z"/><circle cx="90" cy="68" r="4" fill="#5aa0cf"/><circle cx="110" cy="68" r="4" fill="#5aa0cf"/>',
+ toad:'<path d="M60 130c0-30 18-48 40-48s40 18 40 48c0 8-6 12-14 12H74c-8 0-14-4-14-12Z"/><circle cx="82" cy="84" r="10"/><circle cx="118" cy="84" r="10"/><circle cx="82" cy="82" r="4" fill="#d6ad52"/><circle cx="118" cy="82" r="4" fill="#d6ad52"/>',
+ imp:'<path d="M84 46 l6 14 M116 46 l-6 14" stroke="currentColor" stroke-width="5"/><path d="M100 54a16 16 0 1 1 0 32a16 16 0 0 1 0-32Zm-20 36h40l10 40h-12l-4 30h-28l-4-30h-12z"/><path d="M120 128 q30 0 26 -26" fill="none" stroke="currentColor" stroke-width="3"/>',
+ serpent:'<path d="M60 150 q-10 -40 30 -50 q40 -10 20 -40 q-10 -16 10 -24 q24 -6 30 14 q-10 -6 -18 0 q20 30 -10 52 q-30 18 -20 48z"/><circle cx="134" cy="44" r="3" fill="#f3a46b"/>',
+ spell:'<g fill="none" stroke="currentColor" stroke-width="3"><circle cx="100" cy="90" r="34"/><circle cx="100" cy="90" r="20" opacity=".6"/><path d="M100 46v-14M100 148v-14M56 90h-14M158 90h-14"/></g>',
+ drop:'<path d="M100 40c0 0 34 38 34 64a34 34 0 0 1-68 0c0-26 34-64 34-64Z"/>',
+ mask:'<path d="M66 60c20-12 48-12 68 0v36c0 30-14 52-34 52s-34-22-34-52Z" fill="none" stroke="currentColor" stroke-width="4" stroke-dasharray="6 6"/>',
+ maw:'<circle cx="100" cy="90" r="40" fill="none" stroke="currentColor" stroke-width="4"/><path d="M70 90 a30 30 0 0 0 60 0" /><path d="M76 90 l6 10 6-10 6 10 6-10 6 10 6-10 6 10 6-10" fill="none" stroke="#111" stroke-width="2"/>'
+};
+function art(c){
+ const w=WORLDS[c.world];
+ return `<div class="art">${scene(c.world)}<svg viewBox="0 0 200 280" style="position:absolute;inset:0" preserveAspectRatio="xMidYMid meet"><g fill="#0a0b0a" color="#0a0b0a" opacity=".88" transform="translate(0,40)">${SIL[c.sil]}</g></svg></div>`;
+}
+const R_NAME={common:'Обычная',rare:'Редкая',epic:'Эпическая',legend:'Легендарная'};
+
+// Карты концепта. text — простое описание, kw — ключевое слово для значка.
+const CARDS=[
+ {id:'opol',name:'Ополченец',type:'Существо',cls:'Люди',world:'yav',sil:'human',r:'common',cost:1,atk:1,hp:1,reward:0,mark:'Свет',text:'Простой мужик с вилами. Ничего не умеет, зато дешёвый: ставь его, чтобы закрыть удар по своим жизням.'},
+ {id:'druzh',name:'Дружинник',type:'Существо',cls:'Люди',world:'yav',sil:'knight',r:'common',cost:3,atk:2,hp:5,reward:2,mark:'Свет',kw:'Приоритет',text:'<b>Приоритет.</b> Пока Дружинник жив, враг в мире напротив может атаковать только его. Соседа не тронуть.'},
+ {id:'luch',name:'Лучник заставы',type:'Существо',cls:'Люди',world:'yav',sil:'archer',r:'rare',cost:3,atk:2,hp:3,reward:2,mark:'Свет',kw:'Дальнобой',text:'<b>Дальнобой.</b> Стреляет в любой мир соперника, а не только напротив, и не обращает внимания на Приоритет.'},
+ {id:'bogat',name:'Святогор',type:'Существо',cls:'Люди',world:'yav',sil:'knight',r:'legend',cost:8,atk:5,hp:9,reward:5,mark:'Свет',kw:'Приоритет',text:'<b>Приоритет. Щит 2</b> — первые 2 урона за каждый ход не проходят. Можно улучшать: заплати 1 монету, и Святогор получит +1 урон до конца партии (раз за ход).'},
+ {id:'skel',name:'Скелет-щитоносец',type:'Существо',cls:'Нежить',world:'nav',sil:'skull',r:'common',cost:2,atk:1,hp:4,reward:1,mark:'Тьма',kw:'Приоритет',text:'<b>Приоритет.</b> Враг сначала должен сломать его щит. <b>Стойкость:</b> в первый раз, когда должен умереть, остаётся с 1 ХП.'},
+ {id:'upyr',name:'Упырь',type:'Существо',cls:'Нежить',world:'nav',sil:'ghoul',r:'rare',cost:3,atk:2,hp:3,reward:2,mark:'Тьма',kw:'Кровь',text:'Атакует вражескую карту и после удара <b>забирает 1 жизнь у соперника себе</b>: у врага 25 → 24, у тебя +1.'},
+ {id:'koshey',name:'Кощей',type:'Существо',cls:'Нежить',world:'nav',sil:'skull',r:'legend',cost:7,atk:4,hp:7,reward:4,mark:'Тьма',kw:'Жадность',text:'<b>Жадность 1:</b> в начале каждого твоего хода даёт +1 монету. Когда умирает, возвращается в руку, но ты теряешь 3 жизни.'},
+ {id:'kot',name:'Кот',type:'Существо',cls:'Нечисть',world:'chasha',sil:'cat',r:'common',cost:2,atk:1,hp:3,reward:1,mark:'Нейтраль',kw:'Лечит',text:'Сам почти не дерётся. В начале твоего хода <b>лечит соседа на 2 ХП</b> — карту, что стоит с ним в одном мире.'},
+ {id:'kiki',name:'Кикимора',type:'Существо',cls:'Нечисть',world:'chasha',sil:'hag',r:'common',cost:2,atk:2,hp:2,reward:1,mark:'Тьма',kw:'Яд',text:'Атакует и вешает <b>Яд 1</b>: цель теряет 1 ХП в начале каждого своего хода, пока яд не снимут оберегом.'},
+ {id:'yaga',name:'Баба-Яга',type:'Существо',cls:'Нечисть',world:'chasha',sil:'hag',r:'legend',cost:7,atk:3,hp:6,reward:3,mark:'Тьма',text:'Когда выходит на поле, превращает любое не легендарное существо в Жабу 1/1. Награда за ту карту тоже становится 0.'},
+ {id:'zhaba',name:'Болотная жаба',type:'Существо',cls:'Чудища',world:'puchina',sil:'toad',r:'common',cost:1,atk:0,hp:3,reward:0,mark:'Нейтраль',text:'Не атакует. Толстая и терпеливая: просто стоит и принимает удары на себя.'},
+ {id:'kraken',name:'Кракен глубин',type:'Существо',cls:'Чудища',world:'puchina',sil:'kraken',r:'epic',cost:6,atk:3,hp:7,reward:4,mark:'Тьма',kw:'Пожирает',text:'Раз в ход вместо обычной атаки может <b>сожрать щупальцами</b> вражеское существо с 3 ХП или меньше. Крупных не берёт.'},
+ {id:'bes',name:'Бесёнок',type:'Существо',cls:'Бесы',world:'peklo',sil:'imp',r:'common',cost:1,atk:1,hp:1,reward:0,mark:'Тьма',kw:'Рывок',text:'<b>Рывок:</b> атакует сразу в тот ход, когда его поставили. Дальше просто мелкий щит.'},
+ {id:'zmey',name:'Огненный змей',type:'Существо',cls:'Бесы',world:'peklo',sil:'serpent',r:'epic',cost:5,atk:4,hp:6,reward:3,mark:'Тьма',kw:'Таран',text:'<b>Таран:</b> если урона больше, чем ХП у цели, остаток уходит прямо в жизни соперника.'},
+ {id:'krov',name:'Глоток крови',type:'Чары',cls:null,world:'nav',sil:'drop',r:'common',cost:2,mark:'Тьма',text:'Забери 2 жизни у соперника себе. Бьёт по игроку, а не по картам.'},
+ {id:'poglot',name:'Омут поглотил',type:'Чары',cls:null,world:'omut',sil:'maw',r:'epic',cost:6,mark:'Нейтраль',text:'Уничтожь одно любое существо на поле, кроме легендарных. Награду за убийство получаешь ты.'},
+ {id:'lik',name:'Пустой лик',type:'Чары',cls:null,world:'omut',sil:'mask',r:'rare',cost:5,mark:'Нейтраль',text:'Выбери любое не легендарное существо на поле, своё или чужое. На свободное место в своём мире встаёт его точная копия: тот же урон, ХП и способности. Правило класса мира действует и для копии.'},
+ {id:'znamya',name:'Знамя',type:'Чары',cls:null,world:'yav',sil:'spell',r:'common',cost:1,mark:'Свет',text:'Дай своему существу Приоритет до конца следующего хода соперника.'}
+];
+const byId=Object.fromEntries(CARDS.map(c=>[c.id,c]));
+
+function cardHTML(c,extra){
+ extra=extra||'';
+ const w=WORLDS[c.world];
+ const cico=c.cls?ICONS[WORLDS[Object.keys(WORLDS).find(k=>WORLDS[k].cls===c.cls)].ico]:ICONS.spell||'';
+ const clsWorld=c.cls?WORLDS[Object.keys(WORLDS).find(k=>WORLDS[k].cls===c.cls)]:WORLDS.omut;
+ const foot=c.type==='Существо'
+   ?`<span class="atk">⚔ ${c.atk}</span><span class="hpv">♥ ${c.hp}</span>`
+   :`<span style="color:var(--muted);font-weight:500">${c.type}</span>`;
+ return `<button class="card ${extra}" data-id="${c.id}" data-r="${c.r}" style="--w:${clsWorld.w}" aria-label="${c.name}">
+   ${art(c)}
+   <div class="ctop"><span class="cost">${c.cost}</span><span class="cico">${c.cls?cico:ICONS.swirl}</span></div>
+   <div class="cname">${c.name}</div>
+   ${c.kw?`<span class="tag">${c.kw}</span>`:''}
+   <div class="cfoot">${foot}</div>
+ </button>`;
+}
+
+// ---------- состояние ----------
+let state;
+function fresh(order){
+ const pick=order||shuffleArr(ORDER.slice()).slice(0,5);
+ return {
+  worlds:pick,
+  enemy:pick.map(()=>[null,null]),
+  me:pick.map(()=>[null,null]),
+  hand:['opol','druzh','luch','kot','kiki','upyr','kraken','bes','zhaba','krov'],
+  sel:null, inspect:'kraken', hp:[25,25], coins:[10,7], msg:null
+ };
+}
+function shuffleArr(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function seedEnemy(){
+ // соперник ставит пару карт по правилу
+ state.worlds.forEach((wk,i)=>{
+  const w=WORLDS[wk];
+  const natives=CARDS.filter(c=>c.type==='Существо'&&(w.cls===null||c.cls===w.cls)&&c.r!=='legend');
+  if(i===1||i===3){const a=natives[Math.floor(Math.random()*natives.length)];if(a)state.enemy[i][0]=a.id;}
+  if(i===3){const any=CARDS.filter(c=>c.type==='Существо'&&c.r!=='legend');state.enemy[i][1]=any[Math.floor(Math.random()*any.length)].id;}
+  if(i===0){const a=natives.find(c=>c.kw==='Приоритет')||natives[0];if(a)state.enemy[i][0]=a.id;}
+ });
+}
+// правило класса
+function canPlace(side,fi,slot,cid){
+ const c=byId[cid]; if(c.type!=='Существо')return {ok:false,why:'Чары не ставятся в мир — их разыгрывают на карту или игрока.'};
+ const field=state[side][fi]; if(field[slot])return {ok:false,why:'Слот занят.'};
+ const w=WORLDS[state.worlds[fi]];
+ if(w.cls===null)return {ok:true};
+ if(c.cls===w.cls)return {ok:true};
+ const other=field[1-slot];
+ if(other&&byId[other].cls===w.cls)return {ok:true};
+ if(other)return {ok:false,why:`В мире «${w.name}» уже стоит ${byId[other].name} (${byId[other].cls}). Два чужих класса вместе нельзя — нужен хотя бы один из класса ${w.cls}.`};
+ return {ok:false,why:`Мир «${w.name}» родной для класса ${w.cls}. ${c.name} (${c.cls}) может встать сюда только вторым — рядом с существом класса ${w.cls}.`};
+}
+
+// ---------- отрисовка ----------
+const $=id=>document.getElementById(id);
+function worldHTML(side,i){
+ const wk=state.worlds[i],w=WORLDS[wk],field=state[side][i];
+ const slots=field.map((cid,s)=>{
+  if(cid)return cardHTML(byId[cid],side==='enemy'?'enemy':'');
+  if(side==='me'&&state.sel){const r=canPlace('me',i,s,state.sel);return `<div class="slot ${r.ok?'can':'cannot'}" data-f="${i}" data-s="${s}" role="button" tabindex="0">${r.ok?'Поставить':'Нельзя'}</div>`;}
+  return `<div class="slot" data-f="${side==='me'?i:''}" data-s="${s}">${side==='me'?'Пусто':''}</div>`;
+ }).join('');
+ return `<div class="world" style="--w:${w.w};--wbg:${w.wbg}">
+  <div class="scene">${scene(wk)}</div>
+  <div class="whead"><span class="ico">${ICONS[w.ico]}</span>${w.name}<span class="cls">${w.cls||'любой класс'}</span></div>
+  <div class="slots">${slots}</div></div>`;
+}
+function render(){
+ $('enemyRow').innerHTML=state.worlds.map((_,i)=>worldHTML('enemy',i)).join('');
+ $('myRow').innerHTML=state.worlds.map((_,i)=>worldHTML('me',i)).join('');
+ $('hand').innerHTML=state.hand.map(id=>cardHTML(byId[id],state.sel===id?'sel':'')).join('');
+ $('eHp').innerHTML=ICONS.heart+state.hp[1];$('mHp').innerHTML=ICONS.heart+state.hp[0];
+ $('eCoin').innerHTML=ICONS.coin+state.coins[1];$('mCoin').innerHTML=ICONS.coin+state.coins[0];
+ const m=$('msg');
+ if(state.msg){m.textContent=state.msg.t;m.className='msg '+(state.msg.k||'');}
+ else{m.textContent='Выбери карту в руке, затем свободный слот. Зелёным подсвечены слоты, куда её можно поставить.';m.className='msg';}
+ renderInspect();
+}
+function renderInspect(){
+ const c=byId[state.inspect]; if(!c)return;
+ const clsW=c.cls?WORLDS[Object.keys(WORLDS).find(k=>WORLDS[k].cls===c.cls)]:null;
+ $('inspect').innerHTML=`<h2 style="margin:0">${c.name}</h2>
+  <div class="big">${cardHTML(c)}<div class="meta">
+   <div><span class="k">Тип: </span>${c.type}${c.cls?' · '+c.cls:''}</div>
+   <div><span class="k">Родной мир: </span>${clsW?clsW.name:'не ставится в мир'}</div>
+   <div><span class="k">Метка: </span>${c.mark}</div>
+   <div><span class="k">Редкость: </span>${R_NAME[c.r]}</div>
+   <div><span class="k">Цена: </span>${c.cost} мон.</div>
+   ${c.type==='Существо'?`<div><span class="k">Урон / ХП: </span>${c.atk} / ${c.hp}</div>`:''}
+  </div></div>
+  <p class="ability">${c.text}</p>
+  ${c.type==='Существо'?`<div class="reward"><span class="coin" style="width:20px;height:20px;display:inline-block">${ICONS.coin}</span>За убийство сопернику: <strong>${c.reward}</strong> ${plural(c.reward)}</div>`:''}`;
+}
+function plural(n){return n===0?'монет — это щит':n===1?'монета':n<5?'монеты':'монет'}
+
+document.addEventListener('click',e=>{
+ const card=e.target.closest('.card');
+ const slot=e.target.closest('.slot');
+ if(card&&card.closest('#hand')){
+  const id=card.dataset.id; state.inspect=id;
+  state.sel=state.sel===id?null:id;
+  const c=byId[id];
+  state.msg=state.sel?(c.type==='Существо'?{t:`${c.name}: выбери слот. Родной мир — класс ${c.cls}.`}:{t:'Чары не ставятся в мир. В игре их разыгрывают на цель — здесь можно только прочитать описание.'}):null;
+  render();return;
+ }
+ if(card){state.inspect=card.dataset.id;renderInspect();return;}
+ if(slot&&slot.dataset.f!==''&&state.sel){
+  const fi=+slot.dataset.f,s=+slot.dataset.s,r=canPlace('me',fi,s,state.sel),c=byId[state.sel];
+  if(!r.ok){state.msg={t:r.why,k:'bad'};render();return;}
+  if(state.coins[0]<c.cost){state.msg={t:`Не хватает монет: ${c.name} стоит ${c.cost}, у тебя ${state.coins[0]}.`,k:'bad'};render();return;}
+  state.me[fi][s]=state.sel;state.coins[0]-=c.cost;
+  state.hand.splice(state.hand.indexOf(state.sel),1);
+  state.msg={t:`${c.name} встал в мир «${WORLDS[state.worlds[fi]].name}». −${c.cost} мон.`,k:'good'};
+  state.sel=null;render();
+ }
+});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('slot')){e.preventDefault();e.target.click();}});
+$('shuffle').onclick=()=>{state=fresh();seedEnemy();state.msg={t:'Миры перемешаны. Один из шести ушёл со стола.'};render();};
+$('reset').onclick=()=>{state=fresh(state.worlds);seedEnemy();render();};
+
+// разделы ниже стола
+$('worlds').innerHTML=ORDER.map(k=>{const w=WORLDS[k];return `<article class="wcard" style="--w:${w.w};--wbg:${w.wbg}"><div class="scene">${scene(k)}</div><div class="wb"><h3>${ICONS[w.ico]}${w.name}</h3><span class="c">${w.cls?'Родной класс: '+w.cls:'Любой класс'}</span><p>${w.text}</p></div></article>`}).join('');
+$('gallery').innerHTML=CARDS.map(c=>cardHTML(c)).join('');
+$('deckIco').innerHTML=ICONS.swirl;
+
+state=fresh(['yav','nav','omut','puchina','chasha']);seedEnemy();render();
+})();
+</script>

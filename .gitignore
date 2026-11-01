@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.npm-cache/
+test-results/
+playwright-report/
+.env
+.env.*
+.vitest/
+# Generated reports, screenshots and archives: large, reproducible, not needed to build the game.
+output/
+# Local tooling state
+.claude/state/

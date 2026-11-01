@@ -1,0 +1,581 @@
+[
+  {
+    "id": "opol",
+    "name": "Ополченец",
+    "kind": "creature",
+    "class": "human",
+    "rarity": "common",
+    "cost": 1,
+    "attack": 1,
+    "health": 2,
+    "reward": 0,
+    "abilities": {},
+    "abilityText": "—",
+    "description": "Мужик с вилами. Дёшев: закроет удар по твоим жизням.",
+    "copies": 2,
+    "token": false,
+    "world": "yav",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "druzh",
+    "name": "Дружинник",
+    "kind": "creature",
+    "class": "human",
+    "rarity": "common",
+    "cost": 3,
+    "attack": 2,
+    "health": 5,
+    "reward": 2,
+    "abilities": {
+      "priority": 1
+    },
+    "abilityText": "Приоритет",
+    "description": "Воин заставы в кольчуге. Встаёт первым и принимает удар на щит.",
+    "copies": 2,
+    "token": false,
+    "world": "yav",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "luch",
+    "name": "Лучник заставы",
+    "kind": "creature",
+    "class": "human",
+    "rarity": "rare",
+    "cost": 3,
+    "attack": 2,
+    "health": 3,
+    "reward": 2,
+    "abilities": {
+      "ranged": 1
+    },
+    "abilityText": "Дальнобой",
+    "description": "Снимает врага с частокола в любом мире.",
+    "copies": 2,
+    "token": false,
+    "world": "yav",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "svyat",
+    "name": "Святогор",
+    "kind": "creature",
+    "class": "human",
+    "rarity": "legendary",
+    "cost": 8,
+    "attack": 5,
+    "health": 9,
+    "reward": 5,
+    "abilities": {
+      "priority": 1,
+      "shield": 1
+    },
+    "abilityText": "Приоритет, Щит 1",
+    "description": "Богатырь ростом с гору. Закалка для него стоит 1 монету.",
+    "copies": 1,
+    "token": false,
+    "world": "yav",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "mertv",
+    "name": "Мертвяк",
+    "kind": "creature",
+    "class": "undead",
+    "rarity": "common",
+    "cost": 1,
+    "attack": 1,
+    "health": 2,
+    "reward": 0,
+    "abilities": {},
+    "abilityText": "—",
+    "description": "Поднятый из кургана мертвец. Слабый, но закрывает удар.",
+    "copies": 2,
+    "token": false,
+    "world": "nav",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "skel",
+    "name": "Скелет-щитоносец",
+    "kind": "creature",
+    "class": "undead",
+    "rarity": "common",
+    "cost": 2,
+    "attack": 1,
+    "health": 4,
+    "reward": 1,
+    "abilities": {
+      "priority": 1,
+      "steadfast": 1
+    },
+    "abilityText": "Приоритет, Стойкость",
+    "description": "Старый щит держит лучше живого. Ломать его придётся дважды.",
+    "copies": 2,
+    "token": false,
+    "world": "nav",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "upyr",
+    "name": "Упырь",
+    "kind": "creature",
+    "class": "undead",
+    "rarity": "rare",
+    "cost": 3,
+    "attack": 2,
+    "health": 3,
+    "reward": 2,
+    "abilities": {
+      "blood": 1
+    },
+    "abilityText": "Кровь 1",
+    "description": "Бледный кровопийца с курганов.",
+    "copies": 2,
+    "token": false,
+    "world": "nav",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "koshey",
+    "name": "Кощей",
+    "kind": "creature",
+    "class": "undead",
+    "rarity": "legendary",
+    "cost": 7,
+    "attack": 4,
+    "health": 7,
+    "reward": 4,
+    "abilities": {
+      "greed": 1,
+      "steadfast": 1
+    },
+    "abilityText": "Жадность 1, Стойкость",
+    "description": "Бессмертный царь Нави. Хранит свою смерть в игле и копит богатства во тьме.",
+    "copies": 1,
+    "token": false,
+    "world": "nav",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "kot",
+    "name": "Кот",
+    "kind": "creature",
+    "class": "wild",
+    "rarity": "common",
+    "cost": 2,
+    "attack": 1,
+    "health": 3,
+    "reward": 1,
+    "abilities": {
+      "healer": 2
+    },
+    "abilityText": "Лекарь 2",
+    "description": "Мурлычет так, что раны соседа затягиваются.",
+    "copies": 2,
+    "token": false,
+    "world": "chasha",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "kiki",
+    "name": "Кикимора",
+    "kind": "creature",
+    "class": "wild",
+    "rarity": "common",
+    "cost": 2,
+    "attack": 2,
+    "health": 2,
+    "reward": 1,
+    "abilities": {
+      "poison": 1
+    },
+    "abilityText": "Яд 1",
+    "description": "Лохматая болотная старуха. Её тина въедается в раны.",
+    "copies": 2,
+    "token": false,
+    "world": "chasha",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "volk",
+    "name": "Волкодлак",
+    "kind": "creature",
+    "class": "wild",
+    "rarity": "rare",
+    "cost": 4,
+    "attack": 4,
+    "health": 3,
+    "reward": 3,
+    "abilities": {
+      "rush": 1
+    },
+    "abilityText": "Рывок",
+    "description": "Человек днём, зверь ночью. Бросается сразу, но долго не живёт.",
+    "copies": 2,
+    "token": false,
+    "world": "chasha",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "yaga",
+    "name": "Баба-Яга",
+    "kind": "creature",
+    "class": "wild",
+    "rarity": "legendary",
+    "cost": 7,
+    "attack": 3,
+    "health": 6,
+    "reward": 3,
+    "abilities": {
+      "surface": 1
+    },
+    "abilityText": "Всплытие",
+    "description": "Выходя на поле, превращает самое сильное не легендарное существо соперника в Жабу 1/1.",
+    "copies": 1,
+    "token": false,
+    "world": "chasha",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "zhaba",
+    "name": "Болотная жаба",
+    "kind": "creature",
+    "class": "monster",
+    "rarity": "common",
+    "cost": 1,
+    "attack": 0,
+    "health": 3,
+    "reward": 0,
+    "abilities": {},
+    "abilityText": "—",
+    "description": "Не атакует. Просто стоит и принимает удары.",
+    "copies": 2,
+    "token": false,
+    "world": "puchina",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "smey",
+    "name": "Морской змей",
+    "kind": "creature",
+    "class": "monster",
+    "rarity": "rare",
+    "cost": 4,
+    "attack": 3,
+    "health": 5,
+    "reward": 2,
+    "abilities": {
+      "ram": 1
+    },
+    "abilityText": "Таран",
+    "description": "Выныривает из глубины и сносит всё на пути.",
+    "copies": 2,
+    "token": false,
+    "world": "puchina",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "kraken",
+    "name": "Кракен глубин",
+    "kind": "creature",
+    "class": "monster",
+    "rarity": "epic",
+    "cost": 6,
+    "attack": 3,
+    "health": 7,
+    "reward": 4,
+    "abilities": {
+      "devour": 1
+    },
+    "abilityText": "Пожирает",
+    "description": "Щупальца из чёрной воды утаскивают мелочь на дно.",
+    "copies": 1,
+    "token": false,
+    "world": "puchina",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "bes",
+    "name": "Бесёнок",
+    "kind": "creature",
+    "class": "demon",
+    "rarity": "common",
+    "cost": 1,
+    "attack": 1,
+    "health": 1,
+    "reward": 0,
+    "abilities": {
+      "rush": 1
+    },
+    "abilityText": "Рывок",
+    "description": "Мелкий и вредный. Кусается сразу, как выпрыгнул из Пекла.",
+    "copies": 2,
+    "token": false,
+    "world": "peklo",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "chert",
+    "name": "Чёрт-меняла",
+    "kind": "creature",
+    "class": "demon",
+    "rarity": "rare",
+    "cost": 3,
+    "attack": 1,
+    "health": 4,
+    "reward": 2,
+    "abilities": {
+      "greed": 1
+    },
+    "abilityText": "Жадность 1",
+    "description": "Торгует душами. Убей его, пока он не набил карман.",
+    "copies": 2,
+    "token": false,
+    "world": "peklo",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "ognz",
+    "name": "Огненный змей",
+    "kind": "creature",
+    "class": "demon",
+    "rarity": "epic",
+    "cost": 5,
+    "attack": 4,
+    "health": 6,
+    "reward": 3,
+    "abilities": {
+      "ram": 1
+    },
+    "abilityText": "Таран",
+    "description": "Змей из огня и чешуи.",
+    "copies": 1,
+    "token": false,
+    "world": "peklo",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "fire",
+    "name": "Огненный шар",
+    "kind": "spell",
+    "class": null,
+    "rarity": "common",
+    "cost": 2,
+    "attack": 0,
+    "health": 0,
+    "reward": 0,
+    "abilities": {},
+    "abilityText": "цель: враг",
+    "description": "Нанеси 3 урона вражескому существу. Приоритет действует.",
+    "copies": 2,
+    "token": false,
+    "world": "peklo",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "krov",
+    "name": "Глоток крови",
+    "kind": "spell",
+    "class": null,
+    "rarity": "rare",
+    "cost": 2,
+    "attack": 0,
+    "health": 0,
+    "reward": 0,
+    "abilities": {},
+    "abilityText": "без цели",
+    "description": "Забери 2 жизни у соперника себе.",
+    "copies": 2,
+    "token": false,
+    "world": "nav",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "istoch",
+    "name": "Святой источник",
+    "kind": "spell",
+    "class": null,
+    "rarity": "rare",
+    "cost": 2,
+    "attack": 0,
+    "health": 0,
+    "reward": 0,
+    "abilities": {},
+    "abilityText": "цель: своё",
+    "description": "Вылечи своё существо на 4 ХП и сними с него яд.",
+    "copies": 2,
+    "token": false,
+    "world": "yav",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "znamya",
+    "name": "Знамя",
+    "kind": "spell",
+    "class": null,
+    "rarity": "common",
+    "cost": 1,
+    "attack": 0,
+    "health": 0,
+    "reward": 0,
+    "abilities": {},
+    "abilityText": "цель: своё",
+    "description": "Дай своему существу Приоритет до начала твоего следующего хода.",
+    "copies": 2,
+    "token": false,
+    "world": "yav",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "koshel",
+    "name": "Кошель",
+    "kind": "spell",
+    "class": null,
+    "rarity": "common",
+    "cost": 1,
+    "attack": 0,
+    "health": 0,
+    "reward": 0,
+    "abilities": {},
+    "abilityText": "без цели",
+    "description": "Возьми 1 карту и получи 1 монету.",
+    "copies": 2,
+    "token": false,
+    "world": "omut",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "poglot",
+    "name": "Омут поглотил",
+    "kind": "spell",
+    "class": null,
+    "rarity": "epic",
+    "cost": 6,
+    "attack": 0,
+    "health": 0,
+    "reward": 0,
+    "abilities": {},
+    "abilityText": "цель: враг, любой",
+    "description": "Уничтожь не легендарное существо соперника, даже за защитником. Награда твоя.",
+    "copies": 1,
+    "token": false,
+    "world": "omut",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "lik",
+    "name": "Пустой лик",
+    "kind": "spell",
+    "class": null,
+    "rarity": "rare",
+    "cost": 5,
+    "attack": 0,
+    "health": 0,
+    "reward": 0,
+    "abilities": {},
+    "abilityText": "цель: любое",
+    "description": "Выбери не легендарное существо на поле. В твой мир встанет его точная копия (без закалок). Правило класса действует.",
+    "copies": 2,
+    "token": false,
+    "world": "omut",
+    "focus": [
+      50,
+      35
+    ]
+  },
+  {
+    "id": "frog",
+    "name": "Жаба (жетон)",
+    "kind": "creature",
+    "class": "monster",
+    "rarity": "common",
+    "cost": 0,
+    "attack": 1,
+    "health": 1,
+    "reward": 0,
+    "abilities": {},
+    "abilityText": "—",
+    "description": "Заколдованное Бабой-Ягой существо. Не лежит в колоде, после смерти исчезает.",
+    "copies": 0,
+    "token": true,
+    "world": "puchina",
+    "focus": [
+      50,
+      35
+    ]
+  }
+]

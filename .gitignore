@@ -10,3 +10,4 @@ playwright-report/
 output/
 # Local tooling state
 .claude/state/
+tools/

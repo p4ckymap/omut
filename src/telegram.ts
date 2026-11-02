@@ -26,9 +26,9 @@ export function initTelegram() {
     tg.ready();
     tg.expand();
     tg.disableVerticalSwipes?.();
-    tg.setHeaderColor?.('#0C0D0E');
-    tg.setBackgroundColor?.('#0C0D0E');
-    tg.setBottomBarColor?.('#0C0D0E');
+    tg.setHeaderColor?.('#11191F');
+    tg.setBackgroundColor?.('#11191F');
+    tg.setBottomBarColor?.('#11191F');
     // Telegram's Back button closes the top window, or opens the pause during a match (same as Esc).
     tg.BackButton.onClick(() => overlays.closeTop());
     window.setInterval(() => {

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { C } from '../core';
 
 /** Vertical drag/wheel scrolling area with inertia. */
 export class Scroller {
@@ -14,8 +15,8 @@ export class Scroller {
     this.content = scene.add.container(x, top);
     // No geometry mask (unreliable under camera zoom): an opaque header covers content scrolled above `top`.
     const head = scene.add.graphics().setDepth(9);
-    head.fillStyle(0x0b0d0f, 1); head.fillRect(0, 0, x + w, top);
-    head.fillStyle(0x3b3f43, 1); head.fillRect(0, top - 1, x + w, 1);
+    head.fillStyle(C.bg, 1); head.fillRect(0, 0, x + w, top);
+    head.fillStyle(C.line, 1); head.fillRect(0, top - 1, x + w, 1);
     scene.input.on('pointerdown', (p: Phaser.Input.Pointer) => {
       if (!this.inside(p)) return;
       this.dragging = true; this.lastY = p.worldY; this.vel = 0; this.moved = 0;

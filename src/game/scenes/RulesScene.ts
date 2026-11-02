@@ -6,7 +6,7 @@ import { Scroller } from '../ui/Scroller';
 
 const SECTIONS: { title: string; body?: string; items?: [string, string, string][] }[] = [
   { title: 'Цель', body: 'Сведи жизни Бота к нулю. У каждого 25 жизней (меняется в настройках). Колода одна на двоих, сыгранные и погибшие карты уходят в сброс.' },
-  { title: 'Стол', body: 'Жребий-монета решает, кто ходит первым; руки раздаются сразу. Из шести миров на партию выпадают четыре, название и значок мира — внизу его рамки. Твой мир стоит напротив мира Бота. В каждом мире два места — до восьми существ на столе.',
+  { title: 'Стол', body: 'Жребий-монета решает, кто ходит первым; руки раздаются сразу. Из шести миров на партию выпадают четыре, название и значок мира — на его рамке. Твой мир стоит напротив мира Бота. В каждом мире два места — до восьми существ на столе.',
     items: [['sun', 'Явь', 'родной класс Люди'], ['skull', 'Навь', 'родной класс Нежить'], ['eye', 'Чаща', 'родной класс Нечисть'],
       ['tentacle', 'Пучина', 'родной класс Чудища'], ['flame', 'Пекло', 'родной класс Бесы'], ['swirl', 'Омут', 'родного класса нет']] },
   { title: 'Кого можно поставить', body: 'Одна карта может стоять в любом мире. Пара в мире — только если хотя бы одна из карт родного класса этого мира. Например, в Яви: Люди + Нежить можно, Люди + Люди можно, Нежить + Бесы нельзя. В Омуте пара — только одного класса. Значок класса на карте совпадает со значком его родного мира. Существо в родном мире бьёт на 1 сильнее, пока стоит там — значок класса на фишке тогда в золотом кольце.' },
@@ -30,12 +30,12 @@ const SECTIONS: { title: string; body?: string; items?: [string, string, string]
     ['deathstrike', 'Предсмертный удар', 'Есть у всех существ.'],
   ] },
   { title: 'Управление', items: [
-    ['deck', 'Поставить карту', 'Перетащи из руки в золотое место. Или коснись карты, потом места.'],
+    ['deck', 'Поставить карту', 'Перетащи из руки в подсвеченное место. Или коснись карты, потом места.'],
     ['rune', 'Чары', 'Перетащи на цель в подсветке. Чары без цели — на поле или кнопка «Сыграть».'],
     ['move', 'Переставить', 'Пока ход не закончен, только что поставленных существ можно переставлять куда угодно. После «Конца хода» они закрепляются.'],
     ['flame', 'Сжечь', 'Пока тащишь карту, внизу появляется зона «Сжечь карту» — брось туда, получишь монету.'],
     ['flip', 'Описание', 'Двойное касание или долгое нажатие на любую карту. Нажми на карту, чтобы перевернуть.'],
-    ['hammer', 'Усилить', 'Коснись своего существа — над ним появится кнопка «Усилить: +1 атака».'],
+    ['hammer', 'Усилить', 'Коснись своего существа — под полем появится кнопка «Усилить». Она даёт +1 к атаке навсегда; рядом указана цена.'],
   ] },
   { title: 'Подсказки', body: 'Закрывай пустые миры: через них бьют прямо по жизням. Ставь сильных напротив слабых — смотри на стрелки. Когда колода опустеет, оба начнут терять по жизни каждый ход.' },
 ];
@@ -51,39 +51,44 @@ export class RulesScene extends Phaser.Scene {
     setupCamera(this);
     backdrop(this);
     const close = overlays.push(() => this.back());
-    iconButton(this, 12, 8, 'exit', () => close()).setDepth(10);
-    text(this, W / 2, 32, 'Как играть', { size: 30, font: 'display' }).setOrigin(0.5).setDepth(10);
-    const sc = new Scroller(this, 0, 64, W, H - 64);
-    let y = 16;
+    iconButton(this, 18, 26, 'back', () => close()).setDepth(10).setName('rules-back');
+    text(this, 78, 25, 'Как играть', { size: 36, font: 'display' }).setDepth(10);
+    text(this, 78, 71, 'Славянские легенды. Твоя тактика.', { size: 13, color: C.accent }).setDepth(10);
+    const footerY = this.from === 'Match' ? H - 16 : 754;
+    const sc = new Scroller(this, 0, 116, W, footerY - 116);
+    let y = 18;
     const add = (o: Phaser.GameObjects.GameObject & { height?: number }) => { sc.content.add(o); return o; };
     for (const s of SECTIONS) {
-      add(text(this, 24, y, s.title, { size: 24, color: C.gold }));
+      add(text(this, 24, y, s.title, { size: 24, color: C.accent }));
       y += 34;
       if (s.body) {
         const t = add(text(this, 24, y, s.body, { size: 14, font: 'text', wrap: 342, line: 4 })) as Phaser.GameObjects.Text;
         y += t.height + 12;
       }
       for (const [ic, name, desc] of s.items ?? []) {
-        add(icon(this, 32, y + 9, ic));
-        const n = add(text(this, 50, y, name, { size: 14, font: 'text', bold: true, color: C.gold })) as Phaser.GameObjects.Text;
+        add(icon(this, 32, y + 10, ic, 20));
+        const n = add(text(this, 50, y, name, { size: 15, font: 'text', bold: true, color: C.accent })) as Phaser.GameObjects.Text;
         const d = add(text(this, 50, y + n.height + 1, desc, { size: 14, font: 'text', wrap: 316, line: 3 })) as Phaser.GameObjects.Text;
         y += n.height + d.height + 12;
       }
-      const line = this.add.rectangle(24, y + 6, 342, 1, C.line); add(line);
+      const line = this.add.rectangle(24, y + 6, 342, 1, C.line).setOrigin(0, 0.5); add(line);
       y += 24;
     }
-    // Over a running match the tutorial would silently abandon it, so it is offered only from the menu.
+    sc.height = y + 12;
+    // A fixed footer keeps the tutorial discoverable, but never offers to abandon a running match.
+    const footer = this.add.graphics().setDepth(9);
+    footer.fillStyle(C.bg).fillRect(0, footerY, W, H - footerY);
+    footer.fillStyle(C.line).fillRect(24, footerY, 342, 1);
     if (this.from !== 'Match') {
-      const btn = new Button(this, 45, y, 'Пройти обучение', () => { if (sc.wasTap && sc.inside(this.input.activePointer)) this.startTutorial(close); }, { kind: 'main' });
-      add(btn);
-      y += 90;
+      new Button(this, 20, 772, 'Пройти обучение', () => this.startTutorial(close), { w: 350, h: 56, kind: 'main', size: 22, icon: 'book' })
+        .setDepth(10).setName('rules-tutorial');
     }
-    sc.height = y;
   }
 
-  private startTutorial(close: () => void) {
+  private async startTutorial(close: () => Promise<void>) {
+    if (this.leaving) return;
     this.leaving = true;
-    close();
+    await close();
     if (this.from === 'Match') this.scene.stop('Match');
     this.scene.start('Match', { tutorial: true });
   }

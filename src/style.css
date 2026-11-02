@@ -1,7 +1,7 @@
 :root {
   color-scheme: dark;
-  background: #0c0d0e;
-  color: #ece6d6;
+  background: #11191f;
+  color: #f1ebdd;
   font-family: 'Golos Text', sans-serif;
   /* Inside Telegram the client also reports its own safe area (status bar, close button). */
   --safe-top: calc(var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--tg-content-safe-area-inset-top, 0px));
@@ -11,7 +11,7 @@
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; }
-body { position: fixed; inset: 0; background: #0c0d0e; }
+body { position: fixed; inset: 0; background: #11191f; }
 #safe-area {
   position: absolute;
   top: var(--safe-top); right: var(--safe-right);
@@ -20,9 +20,9 @@ body { position: fixed; inset: 0; background: #0c0d0e; }
 }
 #game { position: absolute; inset: 0; }
 canvas { display: block; touch-action: none; }
-#loading { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; padding: 24px; background: #0c0d0e; }
+#loading { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; padding: 24px; background: #11191f; }
 #loading[hidden] { display: none; }
-h1 { font-family: 'Tiny5', monospace; font-size: 64px; font-weight: 400; margin: 0; color: #e2b33c; }
+h1 { font-family: 'Tiny5', monospace; font-size: 64px; font-weight: 400; margin: 0; color: #93b8c6; }
 p { font-size: 14px; }
-button { min-height: 44px; border: 2px solid #e2b33c; background: #2a2208; color: #e2b33c; font: inherit; }
+button { min-height: 44px; border: 2px solid #93b8c6; background: #233f4d; color: #93b8c6; font: inherit; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }

@@ -106,11 +106,11 @@ export class Token extends Phaser.GameObjects.Container {
     this.rewardTag.setVisible(false).removeAll(true);
     const ring = (color: number) => { strokeCut(this.glow, -4, -4, TOKEN_W + 8, TOKEN_H + 8, color, 3, 6); };
     if (s === 'ready') {
-      ring(C.gold);
+      ring(C.accent);
       if (!settings.reduceMotion) this.pulse = this.scene.tweens.add({ targets: this.glow, alpha: 0.35, duration: 800, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
     } else if (s === 'selected') {
-      ring(C.gold); this.art.setTint(0xffffff);
-      this.glow.fillStyle(C.gold, 0.12); this.glow.fillRoundedRect(0, 0, TOKEN_W, TOKEN_H, 6);
+      ring(C.accent); this.art.setTint(0xffffff);
+      this.glow.fillStyle(C.accent, 0.12); this.glow.fillRect(0, 0, TOKEN_W, TOKEN_H);
     } else if (s === 'target') {
       ring(C.blood);
       if (!settings.reduceMotion) this.pulse = this.scene.tweens.add({ targets: this.glow, alpha: 0.4, duration: 420, yoyo: true, repeat: -1 });

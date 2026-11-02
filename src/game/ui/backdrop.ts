@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { H, settings, W } from '../core';
+import { C, H, settings, W } from '../core';
 
 /**
  * Scene background. `art` puts the moonlit Nav landscape full screen (menu); otherwise a calm dark field.
@@ -19,9 +19,9 @@ export function backdrop(scene: Phaser.Scene, opts: { art?: boolean; dim?: numbe
     root.add(shade);
   } else {
     const g = scene.add.graphics();
-    g.fillStyle(0x0d0f12, 1); g.fillRect(0, 0, W, H);
+    g.fillStyle(C.bg, 1); g.fillRect(0, 0, W, H);
     // Soft light pool in the middle, built from a few wide transparent ellipses.
-    for (let i = 0; i < 6; i++) { g.fillStyle(0x1c2a2e, 0.06); g.fillEllipse(W / 2, H * 0.45, W * (1.6 - i * 0.2), H * (0.9 - i * 0.1)); }
+    for (let i = 0; i < 6; i++) { g.fillStyle(0x25404c, 0.035); g.fillEllipse(W / 2, H * 0.45, W * (1.6 - i * 0.2), H * (0.9 - i * 0.1)); }
     root.add(g);
   }
   if (opts.dim) root.add(scene.add.rectangle(0, 0, W, H, 0x000000, opts.dim).setOrigin(0));
@@ -34,7 +34,7 @@ export function backdrop(scene: Phaser.Scene, opts: { art?: boolean; dim?: numbe
   const flies = scene.add.particles(0, 0, 'px', {
     x: { min: 10, max: W - 10 }, y: { min: H * 0.25, max: H - 20 }, lifespan: 5000, speedX: { min: -6, max: 6 }, speedY: { min: -8, max: 2 },
     scale: 1, alpha: { onEmit: () => 0, onUpdate: (_p: unknown, _k: string, t: number) => Math.sin(t * Math.PI) * 0.7 },
-    tint: [0xb8f07a, 0xe8d58a], frequency: 700, maxAliveParticles: 10, blendMode: 'ADD',
+    tint: [C.accent, 0xe8bc7c], frequency: 700, maxAliveParticles: 10, blendMode: 'ADD',
   });
   root.add([fog, flies]);
   return root;

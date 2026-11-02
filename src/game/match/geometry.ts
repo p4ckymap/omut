@@ -12,18 +12,18 @@ export const contains = (r: Rect, x: number, y: number) => x >= r.x && x <= r.x 
 export const center = (r: Rect) => ({ x: r.x + r.w / 2, y: r.y + r.h / 2 });
 
 export function slotRect(player: PlayerId, slot: number): Rect {
-  return { x: WORLD_X[slot >> 1] + 6, y: ROW_Y[player] + 5 + (slot & 1) * 84, w: 76, h: 80 };
+  return { x: WORLD_X[slot >> 1] + 6, y: ROW_Y[player] + 22 + (slot & 1) * 82, w: 76, h: 80 };
 }
 export function worldRect(player: PlayerId, world: number): Rect {
   return { x: WORLD_X[world], y: ROW_Y[player], w: WORLD_W, h: WORLD_H };
 }
-/** The name plate along the bottom edge of a world. */
+/** The name plate above both slots. Rendering, taps and tutorial share this rectangle. */
 export function worldIconRect(player: PlayerId, world: number): Rect {
-  return { x: WORLD_X[world] + 4, y: ROW_Y[player] + 171, w: 80, h: 16 };
+  return { x: WORLD_X[world] + 4, y: ROW_Y[player] + 3, w: 80, h: 16 };
 }
 export const AVATAR: Record<PlayerId, Rect> = { 0: { x: 12, y: 787, w: 44, h: 44 }, 1: { x: 12, y: 6, w: 44, h: 44 } };
 export const PANEL_Y: Record<PlayerId, number> = { 0: 809, 1: 28 };
-export const HP_X = 66, COIN_X = 132;
+export const HP_X = 108, COIN_X = 167;
 export const DECK: Rect = { x: 10, y: 62, w: 64, h: 50 };
 export const DISCARD: Rect = { x: 316, y: 62, w: 64, h: 50 };
 /** Where cards fly from / to: the middle of the pile plates. */

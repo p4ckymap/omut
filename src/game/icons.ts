@@ -62,5 +62,23 @@ export const ICONS: Record<string, string> = {
 };
 
 export function iconSvg(name: string, px: number) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${px}" height="${px}" viewBox="0 0 24 24">${ICONS[name]}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${px}" height="${px}" viewBox="0 0 24 24">${PIXEL_ICONS[name] ?? ICONS[name]}</svg>`;
 }
+
+// Screen chrome is deliberately rectilinear. Card illustrations are separate, unchanged assets.
+const ice = '#93B8C6', chalk = '#F1EBDD', ink = '#11191F';
+const p = (d: string, fill = ice) => `<path d="${d}" fill="${fill}"/>`;
+const PIXEL_ICONS: Record<string, string> = {
+  back: p('M13 3h4v3h-3v3h-3v3H8v1h3v3h3v3h3v3h-4v-3h-3v-3H7v-3H4v-3h3V7h3V4h3z'),
+  grid: p('M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z'),
+  pause: p('M5 4h5v16H5zM14 4h5v16h-5z'),
+  book: p('M2 4h8v1h4V4h8v17h-8v1h-4v-1H2z', chalk) + p('M4 6h5v1h2v12H9v-1H4zM13 7h2V6h5v12h-5v1h-2z') + p('M5 9h4v1H5zM5 12h4v1H5zM5 15h4v1H5zM15 9h4v1h-4zM15 12h4v1h-4zM15 15h4v1h-4z', ink),
+  gear: p('M9 2h6v3h3v3h3v7h-3v3h-3v3H9v-3H6v-3H3V8h3V5h3z') + p('M10 8h4v2h2v4h-2v2h-4v-2H8v-4h2z', ink),
+  swirl: p('M7 1h10v2h3v3h2v11h-2v3h-4v2H7v-2H3v-4H1V8h2V5h3v3H5v8h2v2h9v-2h2V8h-2V6H9v2H7v7h6v-2h-3v-3h6v5h-2v2H8v-2H6V7h2V5h9v2h3V6h-2V4H7z'),
+  deck: p('M8 2h13v17h-3v3H2V6h3V4h3z') + p('M10 4h9v13h-1V6h-8zM7 6h9v13H5V8h2z', ink) + p('M8 9h6v1H8zM8 12h6v1H8zM8 15h6v1H8z'),
+  grave: p('M8 3h8v2h3v14h2v3H3v-3h2V5h3z') + p('M10 6h4v3h3v3h-3v6h-4v-6H7V9h3z', ink),
+  heart: p('M3 4h5v2h2v2h4V6h2V4h5v2h2v7h-2v3h-3v3h-3v3H9v-3H6v-3H3v-3H1V6h2z', '#E2483C'),
+  coin: p('M7 2h10v2h3v3h2v10h-2v3h-3v2H7v-2H4v-3H2V7h2V4h3z', '#E2B33C') + p('M8 5h8v2h2v10h-2v2H8v-2H6V7h2z', '#A87928') + p('M10 7h4v10h-4z', '#FFDB80'),
+};
+// Boot enumerates ICONS; include the newly introduced UI keys there as well.
+for (const key of Object.keys(PIXEL_ICONS)) if (!(key in ICONS)) ICONS[key] = PIXEL_ICONS[key];

@@ -6,7 +6,7 @@ declare global { interface Window { __omut?: Omut } }
 async function open(page: Page, settings: object) {
   const errors: string[] = [];
   page.on('pageerror', e => errors.push(e.message));
-  page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+  page.on('console', m => { if (m.type() === 'error' || (m.type() === 'warning' && /animation skipped|texture.*not found/i.test(m.text()))) errors.push(m.text()); });
   await page.addInitScript(s => localStorage.setItem('omut.settings.v1', JSON.stringify(s)), settings);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
@@ -20,7 +20,7 @@ test('full match: menu → toss → bot turns → result, no console errors', as
   test.setTimeout(240000);
   const errors = await open(page, { tutorialDone: true, speed: 2 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
-  await page.mouse.click(195, 600); // «Нырнуть»
+  await page.mouse.click(195, 662); // «Нырнуть»
   await page.waitForFunction(() => !!window.__omut, null, { timeout: 10000 });
   await page.waitForTimeout(3500);
   // no hand replacement any more: the toss leads straight into the match
@@ -53,7 +53,7 @@ test('tutorial starts with the scripted hand and gates other actions', async ({ 
 test('long press opens the inspector and releasing the finger keeps it open; pause freezes the bot', async ({ page }) => {
   test.setTimeout(150000);
   const errors = await open(page, { tutorialDone: true, speed: 2 });
-  await page.mouse.click(195, 600);
+  await page.mouse.click(195, 662);
   await page.waitForFunction(() => !!window.__omut, null, { timeout: 10000 });
   await page.waitForTimeout(3500);
   // the match starts right after the toss

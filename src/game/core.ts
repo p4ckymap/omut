@@ -8,9 +8,10 @@ export const Z = Math.max(2, Math.min(3, Math.ceil((window.devicePixelRatio || 1
   Math.min(window.innerWidth / W, window.innerHeight / H) - 0.1)));
 
 export const C = {
-  bg: 0x0c0d0e, panel: 0x16181a, panel2: 0x1f2225, line: 0x3b3f43, line2: 0x5a5f64,
-  ink: 0xece6d6, muted: 0x9d988c, gold: 0xe2b33c, goldBg: 0x2a2208, blood: 0xe2483c, heal: 0x94d36c,
-  deep: 0x070a0d, water: 0x0f1a20, wound: 0xff6a5e, deny: 0xff9a90,
+  bg: 0x11191f, panel: 0x17252e, panel2: 0x22313a, line: 0x304954, line2: 0x587888,
+  ink: 0xf1ebdd, muted: 0x9bb3be, gold: 0xe2b33c, goldBg: 0x2a2208, blood: 0xe2483c, heal: 0x94d36c,
+  deep: 0x0b1319, water: 0x132733, wound: 0xff6a5e, deny: 0xff9a90,
+  accent: 0x93b8c6, accentBg: 0x233f4d, accentInk: 0x0b1a23,
 } as const;
 export const HEX = (c: number) => `#${c.toString(16).padStart(6, '0')}`;
 export const RARITY_COLOR = { common: 0xaeb2b7, rare: 0x4f8fd6, epic: 0xa35cff, legendary: 0xe2b33c } as const;
@@ -18,15 +19,16 @@ export const RARITY_NAME = { common: 'Обычная', rare: 'Редкая', epi
 export const CLASS_ICON = { human: 'sun', undead: 'skull', wild: 'eye', monster: 'tentacle', demon: 'flame' } as const;
 
 type TextOpts = { size?: number; color?: number | string; font?: 'pixel' | 'text' | 'display'; bold?: boolean; align?: string; wrap?: number; stroke?: boolean; line?: number };
-export const FONT = { ui: '"Golos Text", sans-serif', display: '"Ruslan Display", "Golos Text", serif' };
-/** Text helper. 'pixel' (default) = bold UI type for numbers and labels; 'display' = title face; 'text' = body. */
+export const FONT = { ui: '"Golos Text", sans-serif', display: '"Tiny5", "Golos Text", sans-serif' };
+/** Pixel headings and labels; small explanatory copy uses the readable body face. */
 export function text(scene: Phaser.Scene, x: number, y: number, value: string, o: TextOpts = {}) {
   const font = o.font ?? 'pixel';
-  const size = font === 'pixel' ? Math.round((o.size ?? 16) * (o.size && o.size >= 32 ? 0.8 : 0.95)) : o.size ?? 16;
+  const size = o.size ?? 16;
+  const pixel = font === 'display' || (font === 'pixel' && size >= 14);
   const t = scene.add.text(x, y, value, {
-    fontFamily: font === 'display' ? FONT.display : FONT.ui,
+    fontFamily: pixel ? FONT.display : FONT.ui,
     fontSize: `${size}px`,
-    fontStyle: font === 'pixel' || o.bold ? '700' : 'normal',
+    fontStyle: !pixel && (font === 'pixel' || o.bold) ? '700' : 'normal',
     color: typeof o.color === 'number' ? HEX(o.color) : o.color ?? HEX(C.ink),
     align: o.align ?? 'left',
     wordWrap: o.wrap ? { width: o.wrap, useAdvancedWrap: true } : undefined,
@@ -39,25 +41,41 @@ export function text(scene: Phaser.Scene, x: number, y: number, value: string, o
 }
 
 export function setupCamera(scene: Phaser.Scene) {
+  document.documentElement.dataset.scene = scene.scene.key;
   const cam = scene.cameras.main;
   cam.setZoom(Z);
   cam.centerOn(W / 2, H / 2);
   cam.setBackgroundColor(C.bg);
 }
 
-/** Panel: rounded corners (radius ≈ 1.6 × cut), 2px border, optional soft shadow underneath. */
-export function panel(g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number,
-  fill: number, stroke: number, opts: { cut?: number; shadow?: boolean; alpha?: number; border?: number } = {}) {
-  const r = Math.round((opts.cut ?? 4) * 1.6), b = opts.border ?? 2, a = opts.alpha ?? 1;
-  if (opts.shadow) { g.fillStyle(0x000000, 0.45); g.fillRoundedRect(x, y + 4, w, h, r); }
-  g.fillStyle(fill, a); g.fillRoundedRect(x, y, w, h, r);
-  if (b > 0) { g.lineStyle(b, stroke, a); g.strokeRoundedRect(x + b / 2, y + b / 2, w - b, h - b, Math.max(1, r - b / 2)); }
+/** Rectilinear two-step corners: the same pixel frame on every game surface. */
+function cutPath(g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number, cut: number) {
+  const c = Math.max(0, Math.min(cut, w / 4, h / 4));
+  const s = c / 2;
+  g.beginPath(); g.moveTo(x + c, y);
+  g.lineTo(x + w - c, y); g.lineTo(x + w - c, y + s); g.lineTo(x + w - s, y + s);
+  g.lineTo(x + w - s, y + c); g.lineTo(x + w, y + c); g.lineTo(x + w, y + h - c);
+  g.lineTo(x + w - s, y + h - c); g.lineTo(x + w - s, y + h - s); g.lineTo(x + w - c, y + h - s);
+  g.lineTo(x + w - c, y + h); g.lineTo(x + c, y + h); g.lineTo(x + c, y + h - s);
+  g.lineTo(x + s, y + h - s); g.lineTo(x + s, y + h - c); g.lineTo(x, y + h - c);
+  g.lineTo(x, y + c); g.lineTo(x + s, y + c); g.lineTo(x + s, y + s);
+  g.lineTo(x + c, y + s); g.closePath();
 }
 
-/** Rounded outline with the stroke kept fully inside the box. */
+/** Stepped panel, inset border and optional pixel shadow. */
+export function panel(g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number,
+  fill: number, stroke: number, opts: { cut?: number; shadow?: boolean; alpha?: number; border?: number } = {}) {
+  const cut = opts.cut ?? 4, b = opts.border ?? 2, a = opts.alpha ?? 1;
+  if (opts.shadow) { g.fillStyle(0x000000, 0.4 * a); cutPath(g, x, y + 4, w, h, cut); g.fillPath(); }
+  g.fillStyle(fill, a); cutPath(g, x, y, w, h, cut); g.fillPath();
+  if (b > 0) strokeCut(g, x, y, w, h, stroke, b, cut, a);
+}
+
+/** Pixel outline with the stroke kept fully inside the box. */
 export function strokeCut(g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number, color: number, width = 2, cut = 4, alpha = 1) {
   g.lineStyle(width, color, alpha);
-  g.strokeRoundedRect(x + width / 2, y + width / 2, w - width, h - width, Math.max(1, Math.round(cut * 1.6) - width / 2));
+  cutPath(g, x + width / 2, y + width / 2, w - width, h - width, Math.max(0, cut - width / 2));
+  g.strokePath();
 }
 
 /** Vector icon (see icons.ts), rasterised at boot for the canvas zoom. */
@@ -111,22 +129,33 @@ export function wait(scene: Phaser.Scene, v: number): Promise<void> {
 // ---------- overlay stack: Esc and the browser Back button close the top overlay ----------
 // Each overlay owns one history entry tagged with its depth; popstate closes everything above the
 // depth it lands on, so Back, Forward and programmatic history.go() never drift out of sync.
-interface Entry { hide: () => void; close: () => void; open: boolean }
+interface Entry { hide: () => void; close: () => Promise<void>; open: boolean }
 const stack: Entry[] = [];
-const goBack = (n: number) => { try { if (n) history.go(-n); } catch { /* sandboxed */ } };
+/** Resolve after the browser finishes its asynchronous traversal, before starting a new scene. */
+const goBack = (n: number): Promise<void> => new Promise(resolve => {
+  if (!n) { resolve(); return; }
+  let timer: ReturnType<typeof setTimeout>;
+  const done = () => { window.removeEventListener('popstate', done); clearTimeout(timer); resolve(); };
+  window.addEventListener('popstate', done, { once: true });
+  // Some embedded browsers ignore history.go. They must not trap scene navigation.
+  timer = setTimeout(done, 1000);
+  try { history.go(-n); } catch { done(); }
+});
 export const overlays = {
   /** Registers an overlay; returns close(), which the overlay's own buttons must call. */
-  push(hide: () => void): () => void {
+  push(hide: () => void): () => Promise<void> {
     const entry: Entry = { hide, open: true, close: () => {
-      if (!entry.open) return;
+      if (!entry.open) return Promise.resolve();
       entry.open = false;
       const i = stack.indexOf(entry);
+      let settled = Promise.resolve();
       if (i >= 0) {
         const above = stack.splice(i);
-        goBack(above.length);
+        settled = goBack(above.length);
         for (const e of above.slice(1)) if (e.open) { e.open = false; e.hide(); }
       }
       hide();
+      return settled;
     } };
     stack.push(entry);
     try { history.pushState({ omut: stack.length }, ''); } catch { /* sandboxed */ }

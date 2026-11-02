@@ -6,7 +6,7 @@ import { apply, createGame, explainAction, legalActions, previewCombat } from '.
 import type { Action, GameEvent, GameState, PlayerId } from '../../engine/types';
 import { sound } from '../audio';
 import { haptic } from '../../telegram';
-import { C, HEX, icon, ms, overlays, saveSettings, settings, setupCamera, strokeCut, text, tween, W, wait } from '../core';
+import { C, HEX, icon, ms, overlays, panel, saveSettings, settings, setupCamera, strokeCut, text, tween, W, wait } from '../core';
 import { backdrop } from '../ui/backdrop';
 import { Button, iconButton } from '../ui/Button';
 import { CARD_H, CARD_W, HandCardView } from '../ui/HandCard';
@@ -71,7 +71,7 @@ export class MatchScene extends Phaser.Scene {
   private endHint!: Phaser.GameObjects.Graphics;
   private endHintTween?: Phaser.Tweens.Tween;
   private timerText!: Phaser.GameObjects.Text;
-  /** Small menu above your creature: «Усилить» and how to move it. */
+  /** Creature actions live below the board, never covering a world or the turn strip. */
   private tokenMenu?: Phaser.GameObjects.Container;
   private burnBtnR!: Button;
   private burnBtnL!: Button;
@@ -127,20 +127,19 @@ export class MatchScene extends Phaser.Scene {
     for (const p of [1, 0] as PlayerId[]) {
       this.state.worlds.forEach((wid, w) => {
         const r = worldRect(p, w);
-        // World art has rounded alpha corners baked in (npm run art); the frame below matches that radius.
-        this.add.image(r.x, r.y, `w:${wid}`).setOrigin(0).setDisplaySize(r.w, r.h).setDepth(0);
-        g.fillStyle(0x000000, p === 1 ? 0.28 : 0.36); g.fillRoundedRect(r.x, r.y, r.w, r.h, 8);
-        strokeCut(g, r.x, r.y, r.w, r.h, p === 1 ? 0x6a3530 : 0x4c5258, 2, 5);
+        // Original world art stays as a quiet texture beneath the new slate table.
+        this.add.image(r.x, r.y, `w:${wid}`).setOrigin(0).setDisplaySize(r.w, r.h).setTint(0x7d9ba8).setAlpha(0.45).setDepth(0);
+        panel(g, r.x, r.y, r.w, r.h, C.panel, C.line2, { cut: 5, alpha: 0.76 });
+        const wd = WORLDS[wid];
         for (let s = 0; s < 2; s++) {
           const sr = slotRect(p, w * 2 + s);
-          g.fillStyle(0x000000, 0.22); g.fillRoundedRect(sr.x, sr.y, sr.w, sr.h, 6);
-          g.lineStyle(1, 0xece6d6, 0.18); g.strokeRoundedRect(sr.x + 0.5, sr.y + 0.5, sr.w - 1, sr.h - 1, 6);
+          panel(g, sr.x, sr.y, sr.w, sr.h, C.deep, C.line2, { cut: 3, alpha: 0.7, border: 1 });
+          icon(this, sr.x + sr.w / 2, sr.y + sr.h / 2, wd.icon, 34).setTint(C.accent).setAlpha(0.16).setDepth(2);
         }
-        const ir = worldIconRect(p, w), wd = WORLDS[wid];
-        g.fillStyle(0x07090b, 0.82); g.fillRoundedRect(ir.x, ir.y, ir.w, ir.h, 8);
-        const name = text(this, 0, ir.y + ir.h / 2, wd.name, { size: 11, font: 'text', bold: true, color: wd.color }).setOrigin(0, 0.5).setDepth(2);
+        const ir = worldIconRect(p, w);
+        const name = text(this, 0, ir.y + ir.h / 2, wd.name, { size: 13, font: 'pixel', color: C.accent }).setOrigin(0, 0.5).setDepth(2);
         const total = 15 + name.width;
-        const ic = icon(this, Math.round(ir.x + ir.w / 2 - total / 2 + 6), ir.y + ir.h / 2, wd.icon, 13).setDepth(2);
+        const ic = icon(this, Math.round(ir.x + ir.w / 2 - total / 2 + 6), ir.y + ir.h / 2, wd.icon, 13).setTint(C.accent).setDepth(2);
         name.setX(Math.round(ic.x + 9));
         this.worldParticles(wid, r);
       });
@@ -171,42 +170,43 @@ export class MatchScene extends Phaser.Scene {
 
   private buildPanels() {
     const bg = this.add.graphics().setDepth(20);
-    bg.fillStyle(0x07090b, 0.78); bg.fillRect(0, 312, W, 30);
-    bg.fillStyle(C.line, 0.8); bg.fillRect(0, 312, W, 1); bg.fillRect(0, 341, W, 1);
+    bg.fillStyle(C.deep, 0.92); bg.fillRect(0, 312, W, 30);
+    bg.fillStyle(C.line2, 0.8); bg.fillRect(10, 312, W - 20, 1); bg.fillRect(10, 341, W - 20, 1);
     this.banner = text(this, W / 2, BANNER_Y, '', { size: 13, font: 'text', align: 'center', wrap: 372, line: -3 }).setOrigin(0.5).setDepth(21);
     const pg = this.add.graphics().setDepth(19);
-    pg.fillStyle(0x0a0c0e, 0.92); pg.fillRect(0, 0, W, 57); pg.fillRect(0, 774, W, 70);
-    pg.fillStyle(C.line, 0.8); pg.fillRect(0, 57, W, 1); pg.fillRect(0, 774, W, 1);
+    pg.fillStyle(C.bg, 0.94); pg.fillRect(0, 0, W, 57); pg.fillRect(0, 774, W, 70);
+    panel(pg, 54, 6, 230, 44, C.panel, C.line, { cut: 4 });
+    panel(pg, 54, 787, 166, 44, C.panel, C.line, { cut: 4 });
     for (const p of [0, 1] as PlayerId[]) {
       const a = AVATAR[p];
       const c = this.add.container(a.x, a.y).setDepth(25);
       const fr = this.add.graphics();
-      fr.fillStyle(0x000000, 1); fr.fillRoundedRect(-2, -2, 48, 48, 9);
+      panel(fr, -2, -2, 48, 48, C.deep, C.line2, { cut: 4 });
       const img = this.add.image(22, 22, p === 1 ? 'avatar-bot' : 'avatar-me').setDisplaySize(44, 44);
-      const ring = this.add.graphics(); strokeCut(ring, -2, -2, 48, 48, p === 1 ? 0x8a3a32 : C.line2, 2, 6);
+      const ring = this.add.graphics(); strokeCut(ring, -2, -2, 48, 48, C.line2, 2, 4);
       c.add([fr, img, ring]);
       this.avatars[p] = c;
       const y = PANEL_Y[p];
+      text(this, 65, y, p === 1 ? 'Бот' : 'Ты', { size: 21 }).setOrigin(0, 0.5).setDepth(25);
       icon(this, HP_X + 9, y, 'heart', 18).setDepth(25);
-      this.hpText[p] = text(this, HP_X + 22, y, '0', { size: 24 }).setOrigin(0, 0.5).setDepth(25);
+      this.hpText[p] = text(this, HP_X + 22, y, '0', { size: 22 }).setOrigin(0, 0.5).setDepth(25);
       icon(this, COIN_X + 9, y, 'coin', 18).setDepth(25);
-      this.coinText[p] = text(this, COIN_X + 22, y, '0', { size: 24, color: C.gold }).setOrigin(0, 0.5).setDepth(25);
+      this.coinText[p] = text(this, COIN_X + 22, y, '0', { size: 22, color: C.ink }).setOrigin(0, 0.5).setDepth(25);
     }
-    text(this, 222, PANEL_Y[1], settings.bot === 'easy' ? 'Бот: лёгкий' : 'Бот', { size: 13, font: 'text', color: C.muted }).setOrigin(0, 0.5).setDepth(25);
-    iconButton(this, 290, 6, 'gear', () => this.openPause()).setDepth(30);
+    text(this, 252, PANEL_Y[1], settings.bot === 'easy' ? 'Лёгкий' : 'Средний', { size: 11, color: C.muted }).setOrigin(0.5).setDepth(25);
+    iconButton(this, 290, 6, 'pause', () => this.openPause()).setDepth(30);
     iconButton(this, 340, 6, 'exit', () => this.askConcede()).setDepth(30);
     this.endBtn = new Button(this, END_BTN.x, END_BTN.y, 'Конец хода', () => this.endTurn(), { w: 150, h: 48, kind: 'main', size: 16 }).setDepth(30);
     this.endHint = this.add.graphics().setDepth(29).setAlpha(0);
-    this.endHint.lineStyle(3, C.gold, 1); this.endHint.strokeRoundedRect(END_BTN.x - 4, END_BTN.y - 4, 158, 56, 13);
+    strokeCut(this.endHint, END_BTN.x - 4, END_BTN.y - 4, 158, 56, C.accent, 3, 5);
     this.timerG = this.add.graphics().setDepth(31);
-    this.timerText = text(this, END_BTN.x + 150, END_BTN.y, '', { size: 13, color: '#FFE39A' }).setOrigin(0.5).setDepth(32);
+    this.timerText = text(this, END_BTN.x + 150, END_BTN.y, '', { size: 13, color: C.accent }).setOrigin(0.5).setDepth(32);
     // Shared deck and discard: two even plates with an icon, a count and a caption.
     const plate = (r: { x: number; y: number; w: number; h: number }, ic: string, caption: string) => {
       const g = this.add.graphics().setDepth(18);
-      g.fillStyle(0x0a0c0e, 0.92); g.fillRoundedRect(r.x, r.y + 2, r.w, 30, 10);
-      g.lineStyle(1.5, C.line2, 1); g.strokeRoundedRect(r.x + 0.75, r.y + 2.75, r.w - 1.5, 28.5, 10);
-      icon(this, r.x + 17, r.y + 17, ic, 18).setDepth(19);
-      text(this, r.x + r.w / 2, r.y + 43, caption, { size: 11, font: 'text', color: C.muted }).setOrigin(0.5).setDepth(19);
+      panel(g, r.x, r.y, r.w, r.h, C.panel, C.line2, { cut: 4, border: 1 });
+      icon(this, r.x + 17, r.y + 17, ic, 18).setTint(C.accent).setDepth(19);
+      text(this, r.x + r.w / 2, r.y + 39, caption, { size: 12, color: C.accent }).setOrigin(0.5).setDepth(19);
       return text(this, r.x + 31, r.y + 17, '0', { size: 16 }).setOrigin(0, 0.5).setDepth(19);
     };
     this.deckText = plate(DECK, 'deck', 'Колода');
@@ -504,6 +504,7 @@ export class MatchScene extends Phaser.Scene {
   }
   setCoins(p: PlayerId, v: number) {
     this.shown.coins[p] = v; this.coinText[p].setText(String(v));
+    this.coinText[p].setScale(Math.min(1, 30 / this.coinText[p].width));
     if (p === 0) for (const h of this.handViews) h.setAffordable(card(h.cardId).cost <= v);
   }
 
@@ -518,7 +519,7 @@ export class MatchScene extends Phaser.Scene {
   }
   setBanner(v: string, kind: 'info' | 'deny' | 'hint' = 'info') {
     this.bannerTimer?.remove();
-    this.banner.setText(v).setColor(kind === 'deny' ? HEX(C.deny) : kind === 'hint' ? HEX(C.gold) : HEX(C.ink));
+    this.banner.setText(v).setColor(kind === 'deny' ? HEX(C.deny) : kind === 'hint' ? HEX(C.accent) : HEX(C.ink));
     if (kind === 'deny') this.bannerTimer = this.time.delayedCall(2500, () => this.setBanner(this.selBanner() ?? this.baseBanner()));
   }
   deny(reason: string) { sound.deny(); haptic('error'); this.setBanner(reason, 'deny'); }
@@ -532,7 +533,7 @@ export class MatchScene extends Phaser.Scene {
     if (!h) return null;
     const def = card(h.cardId), coins = this.state.players[0].coins;
     if (def.cost > coins) return `${def.name}: нужно ${def.cost} монет, у тебя ${coins}. Можно сжечь за +1`;
-    if (def.kind === 'creature') return `${def.name}: перетащи в золотое место или коснись его`;
+    if (def.kind === 'creature') return `${def.name}: перетащи в подсвеченное место или коснись его`;
     if (NO_TARGET_SPELLS.has(def.id)) return `${def.name}: перетащи на поле или нажми «Сыграть»`;
     const enemy = def.id === 'fire' || def.id === 'poglot';
     return `${def.name}: перетащи на ${enemy ? 'врага' : def.id === 'lik' ? 'любое существо' : 'своё существо'} в подсветке`;
@@ -600,16 +601,16 @@ export class MatchScene extends Phaser.Scene {
   private slotMark(slot: number, ok: boolean, cls?: string | null) {
     const r = slotRect(0, slot), g = this.hl;
     if (ok && cls && WORLDS[this.state.worlds[slot >> 1]].native === cls) {
-      const t = text(this, r.x + r.w / 2, r.y + r.h - 14, 'родной: +1 атака', { size: 11, font: 'text', bold: true, color: '#FFE39A', stroke: true }).setOrigin(0.5);
+      const t = text(this, r.x + r.w / 2, r.y + r.h - 18, 'Родной мир\n+1 к атаке', { size: 10, font: 'text', align: 'center', bold: true, color: C.accent, stroke: true }).setOrigin(0.5);
       this.hlLabels.add(t);
     }
     const hovered = this.hover.slot === slot;
     const grow = hovered ? 5 : 0;
     if (ok) {
-      g.fillStyle(hovered ? 0xffe39a : C.gold, hovered ? 0.32 : 0.12); g.fillRoundedRect(r.x - grow, r.y - grow, r.w + grow * 2, r.h + grow * 2, 8);
-      strokeCut(g, r.x - grow, r.y - grow, r.w + grow * 2, r.h + grow * 2, hovered ? 0xffe39a : C.gold, hovered ? 3 : 2, 5);
+      panel(g, r.x - grow, r.y - grow, r.w + grow * 2, r.h + grow * 2, C.accent, C.accent, { cut: 3, alpha: hovered ? 0.3 : 0.12, border: 0 });
+      strokeCut(g, r.x - grow, r.y - grow, r.w + grow * 2, r.h + grow * 2, hovered ? C.ink : C.accent, hovered ? 3 : 2, 3);
     } else {
-      g.fillStyle(C.blood, hovered ? 0.2 : 0.07); g.fillRoundedRect(r.x, r.y, r.w, r.h, 6);
+      panel(g, r.x, r.y, r.w, r.h, C.blood, C.blood, { cut: 3, alpha: hovered ? 0.2 : 0.07, border: 0 });
       g.lineStyle(3, C.blood, 0.75);
       const cx = r.x + r.w / 2, cy = r.y + r.h / 2;
       g.lineBetween(cx - 8, cy - 8, cx + 8, cy + 8); g.lineBetween(cx + 8, cy - 8, cx - 8, cy + 8);
@@ -631,8 +632,7 @@ export class MatchScene extends Phaser.Scene {
   }
   private boardGlow() {
     const g = this.hl;
-    g.lineStyle(2, C.gold, this.hover.board ? 0.9 : 0.35);
-    g.strokeRoundedRect(6, 114, W - 12, 426, 10);
+    strokeCut(g, 6, 114, W - 12, 426, C.accent, 2, 5, this.hover.board ? 0.9 : 0.35);
   }
 
   /** Dotted arrows: who each of your creatures will hit when you end the turn. */
@@ -656,10 +656,10 @@ export class MatchScene extends Phaser.Scene {
         hits.set(a.target, (hits.get(a.target) ?? 0) + a.damage);
         if (a.heroDamage) { const w = Math.floor(loc.slot / 2); heroByWorld.set(w, (heroByWorld.get(w) ?? 0) + a.heroDamage); }
       }
-      this.dottedArrow(g, from.cx, from.y + 6, to.x, to.y, a.target === 'hero' ? C.gold : C.blood);
+      this.dottedArrow(g, from.cx, from.y + 6, to.x, to.y, a.target === 'hero' ? C.accent : C.blood);
     }
     for (const [target, dmg] of hits) { const p = this.tokens.get(target); if (p) this.planLabels.add(this.pill(p.cx, p.y + 22, `−${dmg}`, C.blood)); }
-    for (const [w, dmg] of heroByWorld) { const r = worldRect(1, w); this.planLabels.add(this.pill(r.x + r.w / 2, r.y + r.h / 2, `−${dmg} ♥`, C.gold)); }
+    for (const [w, dmg] of heroByWorld) { const r = worldRect(1, w); this.planLabels.add(this.pill(r.x + r.w / 2, r.y + r.h / 2, `−${dmg} ♥`, C.accent)); }
     // Threat: what the bot's creatures would hit through your empty worlds on its turn.
     for (const [w, dmg] of this.threats()) {
       const r = worldRect(0, w);
@@ -682,11 +682,10 @@ export class MatchScene extends Phaser.Scene {
   }
   private pill(x: number, y: number, value: string, color: number) {
     const c = this.add.container(x, y);
-    const t = text(this, 0, 0, value, { size: 15, color: color === C.gold ? '#FFE39A' : '#FF8A80' }).setOrigin(0.5);
+    const t = text(this, 0, 0, value, { size: 15, color: color === C.accent ? C.accent : C.wound }).setOrigin(0.5);
     const w = Math.round(t.width + 14);
     const g = this.add.graphics();
-    g.fillStyle(0x0b0c0d, 0.9); g.fillRoundedRect(-w / 2, -11, w, 22, 11);
-    g.lineStyle(1.5, color, 0.9); g.strokeRoundedRect(-w / 2, -11, w, 22, 11);
+    panel(g, -w / 2, -11, w, 22, C.deep, color, { cut: 3, alpha: 0.94, border: 1 });
     c.add([g, t]);
     return c;
   }
@@ -695,7 +694,7 @@ export class MatchScene extends Phaser.Scene {
     if (len < 10) return;
     const ux = (x2 - x1) / len, uy = (y2 - y1) / len;
     g.fillStyle(color, 0.75);
-    for (let d = 4; d < len - 12; d += 9) g.fillCircle(x1 + ux * d, y1 + uy * d, 2);
+    for (let d = 4; d < len - 12; d += 9) g.fillRect(Math.round(x1 + ux * d) - 1, Math.round(y1 + uy * d) - 1, 3, 3);
     const px = -uy, py = ux;
     g.fillTriangle(x2, y2, x2 - ux * 11 + px * 6, y2 - uy * 11 + py * 6, x2 - ux * 11 - px * 6, y2 - uy * 11 - py * 6);
   }
@@ -705,8 +704,8 @@ export class MatchScene extends Phaser.Scene {
     if (!show) return;
     const g = this.burnZone.getData('g') as Phaser.GameObjects.Graphics, z = BURN_ZONE, hot = !!this.hover.burn;
     g.clear();
-    g.fillStyle(hot ? 0x4a1c0c : 0x1f1210, 0.96); g.fillRoundedRect(0, 0, z.w, z.h, 12);
-    g.lineStyle(2, 0xff7a33, hot ? 1 : 0.6); g.strokeRoundedRect(1, 1, z.w - 2, z.h - 2, 12);
+    panel(g, 0, 0, z.w, z.h, hot ? 0x4a1c0c : 0x1f1210, 0xff7a33, { cut: 5, alpha: 0.96 });
+    strokeCut(g, 0, 0, z.w, z.h, 0xff7a33, 2, 5, hot ? 1 : 0.6);
   }
 
   // ---------------------------------------------------------------- buttons
@@ -736,7 +735,7 @@ export class MatchScene extends Phaser.Scene {
     for (const b of [this.burnBtnR, this.burnBtnL, this.playBtn, this.cancelBtn]) b.setEnabled(idle);
   }
 
-  /** Tap on your own creature: a small menu with «Усилить» (+1 ⚔ forever) right above it. */
+  /** Tap your creature: show its upgrade and move hints in the reserved action strip. */
   private openTokenMenu(uid: string) {
     this.closeTokenMenu();
     const t = this.tokens.get(uid), loc = locate(this.state, uid);
@@ -744,24 +743,23 @@ export class MatchScene extends Phaser.Scene {
     const cost = upgradeCost(loc.unit);
     const reason = explainAction(this.state, { type: 'Upgrade', player: 0, target: uid });
     const movable = loc.unit.enteredTurn === this.state.turn;
-    const w = 196, h = movable ? 86 : 64;
-    const x = Math.round(Math.max(6, Math.min(W - w - 6, t.cx - w / 2)));
-    const y = Math.round(t.y - h - 8 < 60 ? t.y + TOKEN_H + 8 : t.y - h - 8);
+    const w = 360, h = 52;
+    const x = 15, y = 540;
     const m = this.add.container(x, y).setDepth(960);
     const g = this.add.graphics();
-    g.fillStyle(0x000000, 0.5); g.fillRoundedRect(0, 4, w, h, 12);
-    g.fillStyle(0x16181a, 0.98); g.fillRoundedRect(0, 0, w, h, 12);
-    g.lineStyle(1.5, C.gold, 0.8); g.strokeRoundedRect(0.75, 0.75, w - 1.5, h - 1.5, 12);
+    panel(g, 0, 0, w, h, C.panel, C.line, { cut: 5, alpha: 0.98, border: 1 });
     g.setInteractive(new Phaser.Geom.Rectangle(0, 0, w, h), Phaser.Geom.Rectangle.Contains); // taps on the menu never reach cards below
     m.add(g);
-    const btn = new Button(this, 8, 8, `Усилить: +1 атака`, () => {
+    const btn = new Button(this, 4, 4, `Усилить · ${cost}`, () => {
       this.closeTokenMenu();
       void this.act({ type: 'Upgrade', player: 0, target: uid });
-    }, { w: w - 16, h: 40, size: 14, icon: 'hammer', kind: reason ? 'normal' : 'main' });
+    }, { w: 166, h: 44, size: 20, icon: 'hammer', kind: reason ? 'normal' : 'main' });
+    btn.setName('match-upgrade');
     m.add(btn);
-    if (reason) { btn.setEnabled(false); m.add(text(this, w / 2, 56, reason.length > 34 ? 'Сейчас нельзя усилить' : reason, { size: 11, font: 'text', color: C.muted }).setOrigin(0.5)); }
-    else m.add(text(this, w / 2, 56, `навсегда, за ${cost} ${cost === 1 ? 'монету' : 'монеты'}`, { size: 11, font: 'text', color: C.muted }).setOrigin(0.5));
-    if (movable) m.add(text(this, w / 2, 74, 'перетащи, чтобы переставить', { size: 11, font: 'text', color: '#FFE39A' }).setOrigin(0.5));
+    if (reason) btn.setEnabled(false);
+    const note = reason ? (reason.length > 30 ? 'Сейчас нельзя усилить' : reason) : `+1 атака навсегда · ${cost} мон.`;
+    m.add(text(this, 180, movable ? 15 : 26, note, { size: 11, font: 'text', color: C.muted, wrap: 173 }).setOrigin(0, 0.5));
+    if (movable) m.add(text(this, 180, 36, 'Можно переставить', { size: 12, font: 'text', color: C.accent }).setOrigin(0, 0.5));
     m.setScale(0.9).setAlpha(0);
     this.tweens.add({ targets: m, scale: 1, alpha: 1, duration: ms(120), ease: 'Back.Out' });
     this.tokenMenu = m;
@@ -798,12 +796,12 @@ export class MatchScene extends Phaser.Scene {
     if (this.timeLeft === null || this.over || this.state.activePlayer !== 0) { if (this.timerText.text) this.timerText.setText(''); return; }
     if (!this.busy && !this.modalOpen && !this.time.paused) this.timeLeft = Math.max(0, this.timeLeft - dt / 1000);
     const k = this.timeLeft / Math.max(1, this.turnLength), low = this.timeLeft <= 10;
-    const color = low ? C.blood : C.gold;
+    const color = low ? C.blood : C.accent;
     g.fillStyle(0x0a0c0e, 1); g.fillCircle(END_BTN.x + 150, END_BTN.y, 13);
     g.lineStyle(2.5, color, 1); g.beginPath(); g.arc(END_BTN.x + 150, END_BTN.y, 11, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); g.strokePath();
     const label = String(Math.ceil(this.timeLeft));
     if (this.timerText.text !== label) this.timerText.setText(label);
-    if (low !== this.lowTime) { this.lowTime = low; this.timerText.setColor(low ? '#FF8A80' : '#FFE39A'); }
+    if (low !== this.lowTime) { this.lowTime = low; this.timerText.setColor(low ? HEX(C.wound) : HEX(C.accent)); }
     if (this.timeLeft <= 0 && !this.busy && !this.modalOpen) {
       this.timeLeft = null;
       this.setBanner('Время хода вышло', 'deny');
@@ -1050,7 +1048,7 @@ export class MatchScene extends Phaser.Scene {
       this.setBanner(dmg ? `Мир открыт: в свой ход Бот ударит через него на ${dmg}. Поставь сюда карту из руки` : 'Выбери карту в руке, чтобы поставить её сюда', dmg ? 'deny' : 'info');
       return;
     }
-    if (contains({ x: 0, y: 0, w: 190, h: 57 }, x, y) || contains({ x: 0, y: 774, w: 220, h: 70 }, x, y)) {
+    if (contains({ x: 0, y: 0, w: 284, h: 57 }, x, y) || contains({ x: 0, y: 774, w: 220, h: 70 }, x, y)) {
       const p: PlayerId = y < 100 ? 1 : 0, pl = s.players[p];
       this.setBanner(`${p ? 'Бот' : 'Ты'}: ${pl.hp} жизней, ${pl.coins} монет, ${pl.hand.length} карт в руке`, 'hint');
     }

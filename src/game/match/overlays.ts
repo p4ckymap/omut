@@ -8,7 +8,7 @@ import { ripple, sparks } from '../ui/fx';
 import type { MatchScene } from './MatchScene';
 
 function shade(scene: Phaser.Scene, alpha = 0.82) {
-  return scene.add.rectangle(0, 0, W, H, 0x05070a, alpha).setOrigin(0).setInteractive();
+  return scene.add.rectangle(0, 0, W, H, C.deep, alpha).setOrigin(0).setInteractive();
 }
 
 /** Two-sided coin: gold «Ты» and crimson «Бот», each with its avatar. Drawn once per canvas zoom. */
@@ -29,7 +29,7 @@ function coinFace(scene: Phaser.Scene, side: 'you' | 'bot') {
   ctx.save(); ctx.beginPath(); ctx.arc(c, c * 0.86, c * 0.42, 0, Math.PI * 2); ctx.clip();
   ctx.drawImage(avatar, c - c * 0.42, c * 0.86 - c * 0.42, c * 0.84, c * 0.84); ctx.restore();
   ctx.strokeStyle = rim; ctx.lineWidth = Z * 2; ctx.beginPath(); ctx.arc(c, c * 0.86, c * 0.42, 0, Math.PI * 2); ctx.stroke();
-  ctx.fillStyle = '#FFF4D6'; ctx.font = `800 ${Math.round(c * 0.3)}px "Golos Text"`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#FFF4D6'; ctx.font = `${Math.round(c * 0.34)}px "Tiny5", "Golos Text"`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillText(label, c, c * 1.5);
   scene.textures.addCanvas(key, cv);
   return key;
@@ -41,7 +41,7 @@ export async function tossOverlay(scene: MatchScene, first: PlayerId) {
   const root = scene.add.container(0, 0).setDepth(4500);
   const bg = shade(scene, 0.8);
   root.add(bg);
-  root.add(text(scene, W / 2, 150, 'Жребий', { size: 30, color: C.ink, font: 'display' }).setOrigin(0.5));
+  root.add(text(scene, W / 2, 150, 'Жребий', { size: 40, color: C.ink, font: 'display' }).setOrigin(0.5));
   root.add(text(scene, W / 2, 190, 'Чья сторона выпадет — тот ходит первым', { size: 14, font: 'text', color: C.muted }).setOrigin(0.5));
   const legend = (x: number, key: string, label: string, color: number) => {
     root.add(scene.add.image(x, 250, key).setDisplaySize(40, 40));
@@ -91,15 +91,15 @@ export async function tossOverlay(scene: MatchScene, first: PlayerId) {
 export function pauseOverlay(scene: MatchScene) {
   const root = scene.add.container(0, 0).setDepth(4600);
   root.add(shade(scene, 0.88));
-  root.add(text(scene, W / 2, 90, 'Пауза', { size: 30, font: 'display' }).setOrigin(0.5));
+  root.add(text(scene, W / 2, 90, 'Пауза', { size: 42, font: 'display' }).setOrigin(0.5));
   root.add(text(scene, W / 2, 132, 'Миры на этом столе', { size: 13, font: 'text', color: C.muted }).setOrigin(0.5));
   scene.state.worlds.forEach((wid, i) => {
     const w = WORLDS[wid], y = 168 + i * 50;
     const g = scene.add.graphics();
-    panel(g, 30, y, 330, 42, C.panel, C.line, { cut: 4 });
+    panel(g, 30, y, 330, 42, C.panel, C.line, { cut: 4, border: 1 });
     root.add(g);
     root.add(icon(scene, 52, y + 21, w.icon, 16));
-    root.add(text(scene, 70, y + 21, w.name, { size: 16, color: w.color }).setOrigin(0, 0.5));
+    root.add(text(scene, 70, y + 21, w.name, { size: 17, color: C.accent }).setOrigin(0, 0.5));
     root.add(text(scene, 160, y + 21, w.native ? `родной класс: ${CLASS_NAMES[w.native]}` : 'пара только одного класса', { size: 13, font: 'text', color: C.ink }).setOrigin(0, 0.5));
   });
   let close = () => {};
@@ -120,7 +120,7 @@ export function confirmConcede(scene: MatchScene, onYes: () => void) {
   const g = scene.add.graphics();
   panel(g, 30, 300, 330, 230, C.panel, C.blood, { cut: 6, shadow: true });
   root.add(g);
-  root.add(text(scene, W / 2, 340, 'Сдаться?', { size: 30, color: C.wound, font: 'display' }).setOrigin(0.5));
+  root.add(text(scene, W / 2, 340, 'Сдаться?', { size: 38, color: C.wound, font: 'display' }).setOrigin(0.5));
   root.add(text(scene, W / 2, 384, 'Партия засчитается как поражение.', { size: 14, font: 'text' }).setOrigin(0.5));
   let close = () => {};
   let yes = false;
@@ -139,7 +139,7 @@ export function resultOverlay(scene: MatchScene) {
   const bg = shade(scene, 0);
   root.add(bg);
   scene.tweens.add({ targets: bg, fillAlpha: 0.88, duration: 800 });
-  const title = text(scene, W / 2, 200, win ? 'Победа' : 'Утащило на дно', { size: win ? 56 : 38, color: win ? C.gold : 0x6fb3e8, font: 'display' }).setOrigin(0.5);
+  const title = text(scene, W / 2, 200, win ? 'Победа' : 'Утащило на дно', { size: win ? 56 : 36, color: win ? C.ink : C.accent, font: 'display' }).setOrigin(0.5);
   const sub = text(scene, W / 2, 252, win ? 'Омут отпустил тебя. Пока что.' : 'Черти водятся. Попробуй ещё раз.', { size: 14, font: 'text', color: C.muted }).setOrigin(0.5);
   root.add([title, sub]);
   title.setAlpha(0).setY(win ? 170 : 230);
@@ -166,7 +166,7 @@ export function resultOverlay(scene: MatchScene) {
     const y = 330 + i * 40;
     root.add(icon(scene, 70, y, ic));
     root.add(text(scene, 88, y, label, { size: 14, font: 'text' }).setOrigin(0, 0.5));
-    root.add(text(scene, 320, y, value, { size: 24, color: C.gold }).setOrigin(1, 0.5));
+    root.add(text(scene, 320, y, value, { size: 24, color: C.accent }).setOrigin(1, 0.5));
   });
   const next = scene.tut ? 'Сыграть по-настоящему' : 'Ещё партия';
   root.add(new Button(scene, 45, 640, next, () => scene.leave('Match', { tutorial: false }), { kind: 'main' }));

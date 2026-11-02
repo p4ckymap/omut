@@ -11,6 +11,7 @@ import { MatchScene } from './game/match/MatchScene';
 import '@fontsource/golos-text/400.css';
 import '@fontsource/golos-text/700.css';
 import '@fontsource/ruslan-display/400.css';
+import '@fontsource/tiny5/400.css';
 import './style.css';
 import { initTelegram } from './telegram';
 
@@ -27,6 +28,7 @@ async function boot() {
     const fonts = await Promise.race([
       Promise.all([
         document.fonts.load('32px "Ruslan Display"', 'ОМУТ'),
+        document.fonts.load('32px "Tiny5"', 'ОМУТ Нырнуть 0123456789'),
         document.fonts.load('700 16px "Golos Text"', 'ОМУТ 0123456789 +−'),
         document.fonts.load('13px "Golos Text"', 'Омут водятся 0123456789 ABC abc'),
         document.fonts.load('700 11px "Golos Text"', 'Карта'),
@@ -39,13 +41,15 @@ async function boot() {
     const game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: 'game',
-      backgroundColor: '#0C0D0E',
+      backgroundColor: '#11191F',
       antialias: true,
       roundPixels: false,
       scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: grid ? W : W * Z, height: grid ? H : H * Z },
       input: { activePointers: 1 },
       scene: grid ? [LayoutScene] : [BootScene, MenuScene, MatchScene, RulesScene, BestiaryScene, SettingsScene],
     });
+    // Local UI diagnostics only; never bundled into the public release.
+    if (import.meta.env.DEV) (window as unknown as { __omutGame: Phaser.Game }).__omutGame = game;
     const observer = new ResizeObserver(() => {
       // refresh() alone uses the cached parent size in Phaser 3.90.
       game.scale.getParentBounds();

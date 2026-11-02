@@ -11,14 +11,14 @@ export class BootScene extends Phaser.Scene {
   preload() {
     setupCamera(this);
     const logo = text(this, W / 2, 360, 'ОМУТ', { size: 72, color: C.ink, font: 'display' }).setOrigin(0.5);
-    const sub = text(this, W / 2, 410, 'В чёрном омуте черти водятся', { size: 16, color: C.gold }).setOrigin(0.5);
+    const sub = text(this, W / 2, 410, 'В чёрном омуте черти водятся', { size: 16, color: C.accent }).setOrigin(0.5);
     const bar = this.add.graphics();
     const rings = this.add.graphics();
     let t = 0;
     const draw = (p: number) => {
       bar.clear();
       bar.fillStyle(C.line, 1); bar.fillRect(95, 470, 200, 6);
-      bar.fillStyle(C.gold, 1); bar.fillRect(95, 470, Math.round(200 * p), 6);
+      bar.fillStyle(C.accent, 1); bar.fillRect(95, 470, Math.round(200 * p), 6);
     };
     draw(0);
     this.draw = draw;
@@ -28,7 +28,7 @@ export class BootScene extends Phaser.Scene {
       t += dt / 1000; rings.clear();
       for (let i = 0; i < 3; i++) {
         const k = (t * 0.5 + i / 3) % 1;
-        rings.lineStyle(1, 0x8fe0cf, (1 - k) * 0.5);
+        rings.lineStyle(1, C.accent, (1 - k) * 0.5);
         rings.strokeEllipse(W / 2, 560, 40 + k * 220, (40 + k * 220) * 0.28);
       }
     });
@@ -42,7 +42,9 @@ export class BootScene extends Phaser.Scene {
     for (const w of ['yav', 'nav', 'chasha', 'puchina', 'peklo', 'omut']) this.load.image(`w:${w}`, `${base}worlds/${w}.webp`);
     this.load.image('menu-bg', `${base}ui/menu-bg.webp`);
     this.load.image('avatar-bot', `${base}ui/avatar-bot.webp`);
-    this.load.image('avatar-me', `${base}ui/avatar-me.webp`);
+    this.load.image('avatar-me', `${base}ui/redesign/avatar-raven.webp`);
+    this.load.image('menu-hero', `${base}ui/redesign/menu-hero.webp`);
+    this.load.image('settings-lantern', `${base}ui/redesign/settings-lantern.webp`);
     this.load.image('back', `${base}ui/card-back.webp`);
   }
 
@@ -62,7 +64,7 @@ export class BootScene extends Phaser.Scene {
     })));
     makeFxTextures(this);
     document.documentElement.dataset.ready = 'true';
-    this.cameras.main.fadeOut(250, 12, 13, 14);
+    this.cameras.main.fadeOut(250, 17, 25, 31);
     this.cameras.main.once('camerafadeoutcomplete', () => {
       // Boot stays alive, invisible, and streams the large inspector images in the background.
       if (this.draw) this.load.off('progress', this.draw);
